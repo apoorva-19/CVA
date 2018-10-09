@@ -43,7 +43,7 @@ class Secondary_Node(db.Model):
     __tablename__ = 'secondary_node'
 
     secondary_id = db.Column(db.Integer, primary_key = True)
-    primary_id = db.Column(db.Integer, ForeignKey('Primary_Node.primary_id'))
+    primary_id = db.Column(db.Integer, db.ForeignKey('primary_node.primary_id'), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     condition = db.Column(db.Integer, default=1)
@@ -73,7 +73,7 @@ class Police_Station(db.Model):
 class Gram_Panchayat(db.Model):
 
     __tablename__ = 'gram_panchayat'
-    id = db.Column(db.Integer, primary_key = True, autoIncrement = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     sarpanch_name = db.Column(db.String(30))
     contact = db.Column(db.String(10))
     login = db.Column(db.String(20))

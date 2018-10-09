@@ -1,5 +1,4 @@
-﻿﻿
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -15,19 +14,19 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
 
     <!-- Bootstrap Core Css -->
-    <link href="../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/bootstrap/css/bootstrap.css') }}">
 
     <!-- Waves Effect Css -->
-    <link href="../plugins/node-waves/waves.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/node-waves/waves.css') }}">
 
     <!-- Animation Css -->
-    <link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/animate-css/animate.css') }}">
 
     <!-- Custom Css -->
-    <link href="../css/style.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
-    <link href="../css/themes/all-themes.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/themes/all-themes.css') }}">
 </head>
 
 <body class="theme-light-green">
@@ -71,7 +70,7 @@
             <!-- User Info -->
             <div class="user-info">
                 <div class="image">
-                    <img src="../images/user.png" width="48" height="48" alt="User" />
+                    <img src="{{ url_for('static',filename='images/user.png') }}" width="48" height="48" alt="User" />
                 </div>
                 <div class="info-container">
                     <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apoorva
@@ -94,6 +93,12 @@
                         <a href="index.html">
                             <i class="material-icons">home</i>
                             <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a data-toggle="modal" data-target="#stalkModal">
+                            <i class="material-icons">shopping_cart</i>
+                            <span>Book Stalk Collection</span>
                         </a>
                     </li>
                 </ul>
@@ -121,30 +126,56 @@
         </div>
     </section>
 
+    <div class="modal fade" id="stalkModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="defaultModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sodales orci ante, sed ornare eros
+                    vestibulum ut. Ut accumsan
+                    vitae eros sit amet tristique. Nullam scelerisque nunc enim, non dignissim nibh faucibus
+                    ullamcorper.
+                    Fusce pulvinar libero vel ligula iaculis ullamcorper. Integer dapibus, mi ac tempor varius, purus
+                    nibh mattis erat, vitae porta nunc nisi non tellus. Vivamus mollis ante non massa egestas
+                    fringilla.
+                    Vestibulum egestas consectetur nunc at ultricies. Morbi quis consectetur nunc.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link waves-effect">SAVE CHANGES</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Jquery Core Js -->
-    <script src="../plugins/jquery/jquery.min.js"></script>
+    <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 
     <!-- Bootstrap Core Js -->
-    <script src="../plugins/bootstrap/js/bootstrap.js"></script>
+
+    <script src="{{ url_for('static',filename='plugins/bootstrap/js/bootstrap.js') }}"></script>
 
     <!-- Select Plugin Js -->
-    <script src="../plugins/bootstrap-select/js/bootstrap-select.js"></script>
+    <script src="{{ url_for('static',filename='plugins/bootstrap-select/js/bootstrap-select.js') }}"></script>
 
     <!-- Slimscroll Plugin Js -->
-    <script src="../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+    <script src="{{ url_for('static',filename='plugins/jquery-slimscroll/jquery.slimscroll.js') }}"></script>
 
     <!-- Waves Effect Plugin Js -->
-    <script src="../plugins/node-waves/waves.js"></script>
+    <script src="{{ url_for('static',filename='plugins/node-waves/waves.js') }}"></script>
 
     <!-- Jquery CountTo Plugin Js -->
-    <script src="../plugins/jquery-countto/jquery.countTo.js"></script>
+    <script src="{{ url_for('static',filename='plugins/jquery-countto/jquery.countTo.js') }}"></script>
 
+    <!-- Sparkline Chart Plugin Js -->
+    <script src="{{ url_for('static',filename='plugins/jquery-sparkline/jquery.sparkline.js') }}"></script>
     <!-- Custom Js -->
-    <script src="../js/admin.js"></script>
-    <script src="../js/pages/index.js"></script>
+    <script src="{{ url_for('static',filename='js/admin.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/pages/index.js') }}"></script>
 
     <!-- Demo Js -->
-    <script src="../js/demo.js"></script>
+    <script src="{{ url_for('static',filename='js/demo.js') }}"></script>
 </body>
 
 </html>
