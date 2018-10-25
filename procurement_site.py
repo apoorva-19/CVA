@@ -15,9 +15,10 @@ def favicon():
 def base():
     return render_template('index.html')
 
-@app.route('/login', methods=['POST'])
-def login():
-    form = LoginForm()
+@app.route('/base')
+def actualbase():
+    return render_template('base.html')
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
