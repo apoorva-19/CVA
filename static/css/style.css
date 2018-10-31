@@ -7720,10 +7720,11 @@ fieldset[disabled] .form-control {
 
 /* Login Page ================================== */
 .login-page {
-  background-color: #00BCD4;
+  /* background-color: #00BCD4; */
+  background-image: url('../images/login_background.jpg');
   padding-left: 0;
   max-width: 360px;
-  margin: 5% auto;
+  margin: 10% auto;
   overflow-x: hidden; }
   .login-page .login-box .msg {
     color: #555;

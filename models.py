@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'mysecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://Smoke:smoke_cva123@localhost/cva'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://Smoke:Smoke_cva123@localhost/cva'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -35,8 +35,9 @@ class Farmer(db.Model):
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
+    request_harvest = db.Column(db.Integer, default=0)
 
-    def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state):
+    def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state, request_harvest):
         self.farmer_id = farmer_id
         self.farmer_name = farmer_name
         self.farm_size = farm_size
@@ -45,6 +46,7 @@ class Farmer(db.Model):
         self.village_name = village_name
         self.district_name = district_name
         self.state = state
+        self.request_harvest = request_harvest
 
     def __repr__(self):
         print (f"Farmer id {self.farmer_id}, Farmer name {self.farmer_name}")
@@ -83,6 +85,8 @@ class Stalk_Collector(db.Model):
     collector_id = db.Column(db.String(20), primary_key=True)
     collector_name = db.Column(db.String(40))
     contact_no = db.Column(db.String(10))
+    district_name = db.Column(db.String(25))
+    state = db.Column(db.String(2))
     hours_of_work = db.Column(db.Integer, default=0)
 
     def __init__(self, collector_id, collector_name, contact_no, hours_of_work):
