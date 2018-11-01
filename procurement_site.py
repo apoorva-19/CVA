@@ -56,5 +56,9 @@ def show_job_schedule():
     jobs = Job_List.query.filter((Job_List.collector_id != 'Not assigned') | (Job_List.job_complete == 0))
     return render_template('/harvest_aider/job_schedule.html', joblist=jobs)
 
+@app.route('/harvest_aider/gen_user_id/')
+def gen_user_id():
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)
