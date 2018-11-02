@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "/harvest_aider/harvest_aider_base.html" %}
 {% block content %}
 <div class="row clearfix">
     <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
@@ -101,8 +101,8 @@
          
         state = state_select.value;
         
-        fetch('/harvest-aider/add-collector/' + state).then(function(response) {
-            console.table(response)
+        fetch('/harvest_aider/add_collector/' + state).then(function(response) {
+            console.log(response)
             response.json().then(function(data) {
                 var optionHTML = '';
                 for (var city of data.cities) {
@@ -113,5 +113,8 @@
             
         });
     }
+
+    var collection = document.getElementById("add_collector");
+    collection.classList.add("active")
 </script>
 {% endblock %}

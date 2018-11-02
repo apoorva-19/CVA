@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "/harvest_aider/harvest_aider_base.html" %}
 {% block content %}
 <div class="row clearfix">
     <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
@@ -66,7 +66,7 @@
                             <th>FARMER NAME</th>
                             <th>FEES</th>
                             <th>STATUS</th>
-                            <th>BAILS OF STALK</th>
+                            <th>BALES OF STALK</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,7 +83,7 @@
                             {% else: %}
                                 <td>Completed</td>
                             {% endif %}
-                            <td>{{ job.bails_collected }}</td>
+                            <td>{{ job.bales_collected }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

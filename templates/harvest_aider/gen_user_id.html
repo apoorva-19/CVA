@@ -1,5 +1,5 @@
 {% extends "/harvest_aider/harvest_aider_base.html" %}
-{% block content%}
+{% block content %}
 <div class="row clearfix">
     <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
         <div class="info-box hover-zoom-effect">
@@ -52,62 +52,43 @@
         <div class="card">
             <div class="header">
                 <h2>
-                    JOBS SCHEDULED FOR TODAY
+                    USER ID REQUESTS
                 </h2>
             </div>
             <div class="body table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>COLLECTOR NAME</th>
-                            <th>FARMER NAME</th>
-                            <th>AREA</th>
-                            <th>STATUS</th>
-                            <th>BAILS OF STALK</th>
+                            <th>REQUEST NUMBER</th>
+                            <th>DATE</th>
+                            <th>REQUESTOR</th>
+                            <th>DISTRICT NAME</th>
+                            <th>STATE</th>
+                            <th>NO. OF IDs</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                            <td>Completed</td>
-                            <td>10</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                            <td>Completed</td>
-                            <td>12</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                            <td>Completed</td>
-                            <td>9</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">4</th>
-                            <td>Larry</td>
-                            <td>Jellybean</td>
-                            <td>@lajelly</td>
-                            <td>Incomplete</td>
-                            <td>--</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">5</th>
-                            <td>Larry</td>
-                            <td>Kikat</td>
-                            <td>@lakitkat</td>
-                            <td>Incomplete</td>
-                            <td>--</td>
-                        </tr>
+                        {% if requestlist.new_user_id != null: %}
+                            {% for request in requestlist %}
+                            <tr>
+                                <th scope="row">{{ request.new_user_id }}
+                                <td>{{ request.date.strftime("%d/%m/%Y") }}</td>
+                                <td>{{ request.req_gen_id }}</td>
+                                <td>Raipur</td>
+                                <td>CH<td>
+                                <td>{{ request.req_complete }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else: %}
+                            <tr>
+                                <th></th>
+                                <td></td>
+                                <td></td>
+                                <td>No records to display</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -116,16 +97,7 @@
 </div>
 
 <script type="text/javascript">
-    var collection = document.getElementById("home");
+    var collection = document.getElementById("request_harvest");
     collection.classList.add("active")
-    var collection = document.getElementById("allocate_collector");
-    collection.style.display = "block";
-    var collection = document.getElementById("equip_maintenance");
-    collection.style.display = "block";
-    var collection = document.getElementById("request_truck");
-    collection.style.display = "block";
-    var collection = document.getElementById("report_gen_harvest");
-    collection.style.display = "block";
 </script>
-
 {% endblock %}
