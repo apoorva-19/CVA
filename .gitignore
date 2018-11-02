@@ -12,3 +12,4 @@ pyvenv.cfg
 pip-selfcheck.json
 .vscode
 __pycache__
+migrations
