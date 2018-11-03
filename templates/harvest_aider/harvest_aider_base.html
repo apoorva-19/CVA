@@ -90,43 +90,43 @@
                 <ul class="list">
                     <li class="header">MAIN NAVIGATION</li>
                     <li id="home">
-                        <a href="index.html">
+                        <a href={{ url_for('harvest_aider') }}>
                             <i class="material-icons">home</i>
                             <span>Home</span>
                         </a>
                     </li>
-                    <li id="stalk_collection">
-                        <a data-toggle="modal" data-target="#stalkModal">
-                            <i class="material-icons">shopping_cart</i>
-                            <span>Book Stalk Collection</span>
-                        </a>
-                    </li>
                     <li id="request_harvest">
-                        <a href="list_request.html">
+                        <a href={{ url_for('gen_user_id') }}>
                             <i class="material-icons">format_list_numbered</i>
                             <span>List of Requests</span>
                         </a>
                     </li>
                     <li id="allocate_collector">
-                        <a data-toggle="modal" data-target="#">
+                        <a data-toggle="modal" data-target="#allocate">
                             <i class="material-icons">touch_app</i>
                             <span>Allocate Stalk Collector</span>
                         </a>
                     </li>
+                    <li>
+                        <a href={{ url_for('show_job_schedule') }}>
+                            <i class="material-icons">list</i>
+                            <span>Complete Job Schedule</span>
+                        </a>
+                    </li>
                     <li id="add_collector">
-                        <a data-toggle="modal" data-target="#">
+                        <a href={{ url_for('add_collector') }}>
                             <i class="material-icons">person_add</i>
                             <span>Add New Stalk Collector</span>
                         </a>
                     </li>
                     <li id="equip_maintenance">
-                        <a href="equip_maintenance.html">
+                        <a href="#">
                             <i class="material-icons">build</i>
                             <span>Maintenance of Equipment</span>
                         </a>
                     </li>
                     <li id="request_truck">
-                        <a data-toggle="modal" data-target="#">
+                        <a data-toggle="modal" data-target="#requesting_truck">
                             <i class="material-icons">local_shipping</i>
                             <span>Request Stalk Collection</span>
                         </a>
@@ -161,6 +161,53 @@
             {% endblock %}
         </div>
     </section>
+
+    <div class="modal fade" id="allocate" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="alocateLabel">Allocate Collectors</h4>
+                </div>
+                <div class="modal-body">
+                    Would you like to allocate Collectors?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
+                    <button type="button" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="requesting_truck" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Request Collection of Stalk Bales</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        <label for="stalk_no">Bales of Stalk</label>
+                        <div class="form-group">
+                            <div class="form-line">
+                                <input type="text" id="stalk_no" name="stalk_no" class="form-control" placeholder="Enter the number of bales">
+                            </div>
+                        </div>
+                        <label for="collection_date">Date of Collection</label>
+                        <div class="form-group">
+                            <div class="form-line">
+                                <input type="date" id="collection_date" name="collection_date" class="form-control">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 
