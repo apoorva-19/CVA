@@ -70,22 +70,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for job in joblist %}
-                        <tr>
-                            <th scope="row">{{ job.job_no }}
-                            <td>{{ job.date_job.strftime("%d/%m/%Y") }}</td>
-                            <td>{{ job.time.strftime("%H:%M") }}</td>
-                            <td>{{ job.collector_id }}</td>
-                            <td>{{ job.farmer_id }}</td>
-                            <td>{{ job.fees }}</td>
-                            {% if job.job_complete == 0: %}
-                                <td style="color: red">Incomplete</td>
-                            {% else: %}
-                                <td>Completed</td>
-                            {% endif %}
-                            <td>{{ job.bales_collected }}</td>
-                        </tr>
-                        {% endfor %}
+                        {% if joblist.count() > 0: %}
+                            {% for job in joblist %}
+                            <tr>
+                                <th scope="row">{{ job.job_no }}</th>
+                                <td>{{ job.date_job }}</td>
+                                <td>{{ job.time }}</td>
+                                <td>{{ job.collector_id }}</td>
+                                <td>{{ job.farmer_id }}</td>
+                                <td>{{ job.fees }}</td>
+                                {% if job.job_complete == 0: %}
+                                    <td style="color: red">Incomplete</td>
+                                {% else: %}
+                                    <td>Completed</td>
+                                {% endif %}
+                                <td>{{ job.bales_collected }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else: %}
+                            <tr>
+                                <th></th>
+                                <td></td>
+                                <td></td>
+                                <td>No records to display</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

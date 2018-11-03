@@ -798,7 +798,7 @@ state = {
     "Andhra Pradesh": "AP",
     "Arunachal Pradesh": "AR",
     "Assam": "AS",
-    "Bihar": "BR",
+    "Bihar": "BH",
     "Chandigarh": "CH",
     "Chhattisgarh": "CT",
     "Dadra and Nagar Haveli": "DN",
