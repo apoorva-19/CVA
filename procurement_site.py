@@ -23,18 +23,19 @@ def actualbase():
     
 @app.route('/addreq', methods=['GET', 'POST'])
 def reqgen():
-    # from stalk import req
     farmers = Farmer.query.filter_by(request_harvest = 0).all()
     if flask.request.method == 'POST':
         returned_values=request.form.getlist('request')
-        # req(returned_values)
         for i in returned_values:
             print(i)
             val = Farmer.query.filter_by(farmer_id  = i).all()
             for v in val:
                 v.request_harvest = 1
+                j_id = v.state+v.farmer_id
+                exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
+                job = Job_List(j_id,v.farmer_id,'1',v.village_name, v.farm_size,0,exp_dur)
+                db.session.add(job)
                 db.session.commit()
-
     farmers = Farmer.query.filter_by(request_harvest = 0).all()       
     return render_template('add_req.html', data=farmers)
 
@@ -50,12 +51,26 @@ def stalk():
             jlist = Job_List.query.filter_by(job_no = j).all()
             for l in jlist:
                 l.bails_collected = b
+                l.fees = (l.farm_size*400)
                 # l.job_complete = 1
-                db.session.commit()      
+                db.session.commit()
     jl = Job_List.query.filter_by(collector_id = id).all()
     if len(jl) != 0:   
         return render_template('stalk_collector.html', data=jl)
     return render_template('stalk_collector.html', data=0)
+
+@app.route('/finjobs', methods=['GET','POST'])
+def job_comp():
+    id = 1
+    if flask.request.method == 'POST':
+        jobs = request.form.getlist('j')
+        for j in jobs:
+            jlist = Job_List.query.filter_by(job_no = j).all()
+            for l in jlist:
+                l.job_complete = 1
+                print('l.job_complete')
+                db.session.commit()
+    return redirect('/stalkcol')       
 
 # def est_hrs():
 

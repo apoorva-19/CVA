@@ -28,11 +28,11 @@
                                 <br>
                                 Date of job: {{ j.date_job }}
                                 <br>
-                                Time: {{ j.time }}am
+                                Time: {{ j.time }} 
                                 <br>
-                                Time Reqd: {{ j.expected_duaration }}
+                                Time Reqd: {{'%0.1f' % j.expected_duration }} hrs
                                 {% if j.bails_collected == 0%}
-                                <form method="POST" action="/stalkcol" class="form-horizontal">
+                                <form method="POST" action= {{url_for('stalk') }} class="form-horizontal">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <div class="form-line">
@@ -54,11 +54,16 @@
                                 </form>
 
                                 {%endif%}
-                                {%if j.bails_collected != 0%}
+                                {%if j.bails_collected != 0%}   
+                                    <br>
                                     Bales collected: {{ j.bails_collected }}
-                                    Hours Spent: {{ j.expected_duaration }}
-                                <br>
-                                Fees to collect: 
+                                    <br>
+                                    Fees to collect: {{ j.fees }}
+                                    <form method="POST" action= {{ url_for('job_comp') }} class="form-horizontal">
+                                        <input type="hidden" , value = {{ j.job_no }} name = "j">
+                                        <br>
+                                        <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
+                                    </form>
                                 {%endif%}
                             </div>          
                         </div>
