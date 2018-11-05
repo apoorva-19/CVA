@@ -1,0 +1,42 @@
+{%extends "base.html"%}
+{%block content%}
+
+<div class="row clearfix">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="card">
+            <div class="header">
+                <h2>Add new Request</h2>
+            </div>
+            <div class="body table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Sr_no</th>
+                                <th>Farmer Name</th>
+                                <th>Plot Area</th>
+                                <th>Request harvest</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form method="POST" action= {{url_for('reqgen')}}>
+                            {% for row in data %}
+                                <tr>
+                                    <td>{{ row.farmer_id }}</td>
+                                    <td>{{ row.farmer_name }}</td>
+                                    <td>{{ row.farm_size }}</td>
+                                    <td><input type="checkbox" id = {{ row.farmer_id }} value = {{ row.farmer_id }} name = "request" class="chk-col-green" >
+                                        <label for= {{ row.farmer_id }} ></label></td>   
+                                </tr>
+                            {% endfor %}
+                        
+                    </tbody>
+                    </table>
+                                 <button type="submit" class="btn btn-success waves-effect">SUBMIT</button>
+                             </form>
+                </div>
+                 </div>
+    </div>
+    <script>
+        request=document.querySelector('.chk-col-green').checked;
+    </script>
+{%endblock%}
