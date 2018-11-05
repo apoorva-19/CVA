@@ -115,7 +115,7 @@ code = {
     "CH":[  
             "Chandigarh"
          ],
-    "CT":[  
+    "CG":[  
             "Balod",
             "Baloda Bazar",
             "Balrampur",
@@ -800,7 +800,7 @@ state = {
     "Assam": "AS",
     "Bihar": "BH",
     "Chandigarh": "CH",
-    "Chhattisgarh": "CT",
+    "Chhattisgarh": "CG",
     "Dadra and Nagar Haveli": "DN",
     "Daman and Diu": "DD",
     "Delhi": "DL",

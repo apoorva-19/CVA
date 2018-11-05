@@ -72,7 +72,7 @@
                     <div class="row clearfix form-group">
                         <div class="col-md-6">
                             <label for="state">State</label>
-                            <select class="form-control" id="state" name="state">
+                            <select class="form-control form-line" id="state" name="state">
                                {% for key, value in state %}
                                <option value="{{ key }}">{{ value }}</option>
                                {% endfor%}
@@ -80,7 +80,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="district_name">District</label>
-                            <select class="form-control" id="district_name" name="district_name">
+                            <select class="form-control form-line" id="district_name" name="district_name">
                                 {% for key, value in district_name %}
                                 <option value="{{ key }}">{{ value }}</option>
                                 {% endfor%}

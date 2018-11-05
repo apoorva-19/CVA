@@ -23,6 +23,24 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class Patwari(db.Model):
+
+    __tablename__ = 'patwari'
+
+    patwari_id = db.Column(db.String(20), primary_key = True)
+    password = db.Column(db.String(256))
+    patwari_name = db.Column(db.String(40))
+    district_name = db.Column(db.String(20))
+    state = db.Column(db.String(2))
+    contact_no = db.Column(db.String(10))
+
+    def __init__(self, patwari_id, patwari_name, district_name, state, contact_no):
+        self.patwari_id = patwari_id
+        self.patwari_name = patwari_name
+        self.district_name = district_name
+        self.state = state
+        self.contact_no = contact_no
+
 class Farmer(db.Model):
 
     __tablename__ = 'farmer'

@@ -1,0 +1,51 @@
+{% extends "/patwari/patwari_base.html" %}
+{% block content %}
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    LIST OF FARMERS
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>FARMER NAME</th>
+                            <th>AREA (in acres)</th>
+                            <th>CONTACT NUMBER</th>
+                            <th>VILLAGE NAME</th>
+                            <th>DISTRICT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if farmerlist.count() > 0: %}
+                        {% for farmer in farmerlist %}
+                        <tr>
+                            <th scope="row">{{ farmer.farmer_id}}</th>
+                            <td>{{ farmer.farmer_name }}</td>
+                            <td>{{ farmer.farmer_size }}</td>
+                            <td>{{ farmer.contact_no }}</td>
+                            <td>{{ farmer.village_name }}</td>
+                            <td>{{ farmer.district_name }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else: %}
+                        <tr>
+                            <th></th>
+                            <td></td>
+                            <td>No records to display</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

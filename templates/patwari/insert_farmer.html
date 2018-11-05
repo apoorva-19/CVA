@@ -1,0 +1,108 @@
+{% extends "/patwari/patwari_base.html" %}
+{% block content %}
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    INSERT FARMER DETAILS
+                </h2>
+            </div>
+            <div class="body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 col-12">
+                            <label for="name">Name</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter the name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6  col-12">
+                            <label for="size">Farm Size (in acres)</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="number" id="size" name="size" class="form-control" placeholder="Enter the size"
+                                        min=0.1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-12">
+                            <label for="aadhar_no">Aadhar Number</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="aadhar_no" name="aadhar_no" class="form-control" placeholder="Enter the Aaadhar number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label for="contact_no">Contact Number</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="contact_no" name="contact_no" class="form-control"
+                                        placeholder="Enter the contact number">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row clearfix form-group">
+                        <div class="col-md-4">
+                            <label for="village_name">Village Name</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="village_name" name="village_name" class="form-control"
+                                        placeholder="Enter the village name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="state">State</label>
+                            <select class="form-control form-line" id="state" name="state">
+                                {% for key, value in state %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor%}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="district_name">District</label>
+                            <select class="form-control form-line" id="district_name" name="district_name">
+                                {% for key, value in district_name %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor%}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary m-t-15 waves-effect">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var state_select = document.getElementById("state");
+    var city_select = document.getElementById("district_name");
+    state_select.onchange = function () {
+
+        state = state_select.value;
+
+        fetch('/patwari/insert_farmer/' + state).then(function (response) {
+            console.log(response)
+            response.json().then(function (data) {
+                var optionHTML = '';
+                for (var city of data.cities) {
+                    optionHTML += '<option value=' + city.id + '>' + city.name + '</option>';
+                }
+                city_select.innerHTML = optionHTML;
+            })
+
+        });
+    }
+
+    var collection = document.getElementById("insert_farmer");
+    collection.classList.add("active")
+</script>
+{% endblock %}
