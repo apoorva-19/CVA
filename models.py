@@ -28,11 +28,11 @@ class Patwari(db.Model):
     __tablename__ = 'patwari'
 
     patwari_id = db.Column(db.String(20), primary_key = True)
-    password = db.Column(db.String(256))
+    password_hash = db.Column(db.String(128))
     patwari_name = db.Column(db.String(40))
     district_name = db.Column(db.String(20))
     state = db.Column(db.String(2))
-    contact_no = db.Column(db.String(10))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
 
     def __init__(self, patwari_id, patwari_name, district_name, state, contact_no):
         self.patwari_id = patwari_id
@@ -48,7 +48,7 @@ class Farmer(db.Model):
     farmer_id = db.Column(db.String(20), primary_key = True)
     farmer_name = db.Column(db.String(40))
     farm_size = db.Column(db.Integer)
-    contact_no = db.Column(db.String(10))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
     adhaar = db.Column(db.String(12))
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
@@ -105,9 +105,9 @@ class Stalk_Collector(db.Model):
     __tablename__= 'stalk_collector'
 
     collector_id = db.Column(db.String(20), primary_key=True)
-    password = db.Column(db.String(256))
+    password_hash = db.Column(db.String(128))
     collector_name = db.Column(db.String(40))
-    contact_no = db.Column(db.String(10))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
     hours_of_work = db.Column(db.Integer, server_default='0')
@@ -125,10 +125,10 @@ class Gram_Panchayat(db.Model):
     __tablename__ = 'gram_panchayat'
 
     username = db.Column(db.String(20), primary_key=True)
-    password = db.Column(db.String(256))
+    password_hash = db.Column(db.String(128))
     name = db.Column(db.String(30))
-    contact_no = db.Column(db.String(10))
-    email_id = db.Column(db.String(50))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
+    email_id = db.Column(db.String(64), unique=True, index=True)
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
@@ -199,9 +199,9 @@ class Harvest_Aider(db.Model):
     __tablename__ = 'harvest_aider'
 
     aider_id = db.Column(db.String(20), primary_key=True)
-    password = db.Column(db.String(270))
+    password_hash = db.Column(db.String(128))
     name = db.Column(db.String(40))
-    contact_no = db.Column(db.String(10))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
     district = db.Column(db.String(20))
     state = db.Column(db.String(2))
     no_villages = db.Column(db.Integer)
