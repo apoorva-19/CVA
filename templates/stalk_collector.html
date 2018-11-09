@@ -1,0 +1,74 @@
+{%extends "base.html"%}
+{%block content%}
+    {%if data == 0:%}
+    <div class="row-clearfix">
+        <div class="card">
+            <div class="header">    
+                <h2>NO JOBS FOR TODAY</h2>
+            </div>    
+        </div>
+    </div>
+        
+    {%endif%}    
+    {%if data != 0:%}
+        {% for j in data: %} 
+            {%if j.job_complete == 0%}
+                <div class="row clearfix">    
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="card">
+                            <div class="header">
+                                <h2>
+                                    JOB {{ j.job_no }}
+                                </h2>
+                            </div>
+                            <div class="body">
+                                Farmer id: {{ j.farmer_id }}
+                                <br>
+                                Farm Size: {{ j.farm_size }}
+                                <br>
+                                Date of job: {{ j.date_job }}
+                                <br>
+                                Time: {{ j.time }} 
+                                <br>
+                                Time Reqd: {{'%0.1f' % j.expected_duration }} hrs
+                                {% if j.bails_collected == 0%}
+                                <form method="POST" action= {{url_for('stalk') }} class="form-horizontal">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="form-line">
+                                                <input type="text" class="form-control" placeholder="Bales Collected" name = "bales">
+                                            </div>
+                                        </div>
+                                    </div>   
+                                    <!-- <div class="col-md-6">
+                                            <div class="form-group">
+                                                <div class="form-line">
+                                                    <input type="text" class="form-control" placeholder="Hours spent" name = "hours">
+                                                </div>
+                                            </div>
+                                        </div>                                             -->
+                                    <br>
+                                    <input type="hidden" id = {{ j.job_no }} value= {{ j.job_no }} name = "j_no">
+                                    <br>
+                                    <button type="submit" class="btn btn-success waves-effect">Calculate Fees to Collect</button>
+                                </form>
+
+                                {%endif%}
+                                {%if j.bails_collected != 0%}   
+                                    <br>
+                                    Bales collected: {{ j.bails_collected }}
+                                    <br>
+                                    Fees to collect: {{ j.fees }}
+                                    <form method="POST" action= {{ url_for('job_comp') }} class="form-horizontal">
+                                        <input type="hidden" , value = {{ j.job_no }} name = "j">
+                                        <br>
+                                        <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
+                                    </form>
+                                {%endif%}
+                            </div>          
+                        </div>
+                    </div>
+            {%endif%}  
+        {%endfor%}
+    {%endif%}    
+{%endblock%}

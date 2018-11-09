@@ -3,7 +3,7 @@
 #db.create_all()
 
 #set migrations (save changes made to database)
-#export FLASK_APP=procurement.py
+#export FLASK_APP=procurement_site.py
 #First time
 ##flask db init
 #All other times
@@ -53,7 +53,7 @@ class Farmer(db.Model):
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
-    request_harvest = db.Column(db.Integer, server_default='0')
+    request_harvest = db.Column(db.Integer, default=0)
 
     def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state, request_harvest):
         self.farmer_id = farmer_id
@@ -149,13 +149,17 @@ class Request_Harvest(db.Model):
 
     request_id = db.Column(db.Integer, primary_key=True)
     requestor_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
+<<<<<<< HEAD
+=======
+    req_gen = db.relationship('Gram_Panchayat', backref='request_harvest', uselist=False, foreign_keys=[requestor_id])
+>>>>>>> Era
     no_farmers = db.Column(db.Integer)
     date_request = db.Column(db.Date)
     jobs_completed = db.Column(db.Integer, server_default='0')
     req_gen = db.relationship(Gram_Panchayat, backref='request_harvest', uselist=False, foreign_keys=requestor_id)
 
-    def __init__(self, requestor_id, no_farmers, date_request):
-        self.request_id = requestor_id
+    def __init__(self, request_id , requestor_id, no_farmers, date_request):
+        self.request_id = request_id
         self.requestor_id = requestor_id
         self.no_farmers = no_farmers
         self.date_request = date_request
@@ -167,6 +171,10 @@ class Request_user_id(db.Model):
     new_user_id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     req_gen_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
+<<<<<<< HEAD
+=======
+    req_gen = db.relationship('Gram_Panchayat', backref='request_user_id', uselist=False, foreign_keys=[req_gen_id])
+>>>>>>> Era
     no_gen = db.Column(db.Integer)
     req_complete = db.Column(db.Integer, server_default='0')
     req_gen = db.relationship(Gram_Panchayat, backref='request_user_id', uselist=False, foreign_keys=req_gen_id)
