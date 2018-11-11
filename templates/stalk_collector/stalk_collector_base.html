@@ -73,7 +73,7 @@
                     <img src="{{ url_for('static',filename='images/user.png') }}" width="48" height="48" alt="User" />
                 </div>
                 <div class="info-container">
-                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{% print(session['username']) %}</div>
+                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ session['username'] }}</div>
                     <div class="btn-group user-helper-dropdown">
                         <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
                         <ul class="dropdown-menu pull-right">
@@ -87,19 +87,20 @@
             <!-- Menu -->
             <div class="menu">
                 <ul class="list">
-                    <li class="header">MAIN NAVIGATION</li>
-                    <li id="home">
-                        <a href={{ url_for('stalk') }}>
-                            <i class="material-icons">home</i>
-                            <span>Home</span>
-                        </a>
-                    </li>    
-                    <li id="home">
+                        <li class="header">MAIN NAVIGATION</li>
+                        <li id="home">
+                            <a href={{ url_for('stalk') }}>
+                                <i class="material-icons">home</i>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li id="insert_farmer">
                             <a href={{ url_for('date_schedule') }}>
                                 <i class="material-icons">view_day</i>
-                                <span>Check jobs by date</span>
+                                <span>Datewise Schedule</span>
                             </a>
-                        </li>                        
+                        </li>
+    
                 </ul>
             </div>
             <!-- #Menu -->
@@ -124,6 +125,7 @@
             {% endblock %}
         </div>
     </section>
+
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 
@@ -132,7 +134,7 @@
     <script src="{{ url_for('static',filename='plugins/bootstrap/js/bootstrap.js') }}"></script>
 
     <!-- Select Plugin Js -->
-    <script src="{{ url_for('static',filename='plugins/bootstrap-select/js/bootstrap-select.js') }}"></script>
+    <!-- <script src="{{ url_for('static',filename='plugins/bootstrap-select/js/bootstrap-select.js') }}"></script> -->
 
     <!-- Slimscroll Plugin Js -->
     <script src="{{ url_for('static',filename='plugins/jquery-slimscroll/jquery.slimscroll.js') }}"></script>
@@ -145,13 +147,6 @@
 
     <!-- Sparkline Chart Plugin Js -->
     <script src="{{ url_for('static',filename='plugins/jquery-sparkline/jquery.sparkline.js') }}"></script>
-
-    <!-- Moment Plugin Js -->
-    <script src="{{ url_for('static', filename='plugins/momentjs/moment.js') }}"></script>
-
-    <!-- Bootstrap Material Datetime Picker Plugin Js -->
-    <script src="{{ url_for('static', filename='plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js') }}"></script>
-    
     <!-- Custom Js -->
     <script src="{{ url_for('static',filename='js/admin.js') }}"></script>
     <script src="{{ url_for('static',filename='js/pages/index.js') }}"></script>
