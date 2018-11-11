@@ -1,4 +1,4 @@
-{% extends "/stalk_collector/stalk_collector_base.html" %}
+{% extends "/gram_panchayat/gram_panchayat_base.html" %}
 {% block content %}
 
 <div class="row clearfix">
@@ -18,7 +18,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <form method="POST" action= {{ url_for('reqgen') }}>
+                            <form method="POST" action= {{ url_for('request_generator') }}>
                             {% for row in data %}
                                 <tr>
                                     <td>{{ row.farmer_id }}</td>

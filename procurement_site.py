@@ -217,10 +217,11 @@ def allocate_collector():
         db.session.commit()
     else:
         return render_template('404.html')
-    
-@app.route('/stalk_collector/add_request/', methods=['GET', 'POST'])
-def reqgen():
-    if g.user and g.user[4] == 'S':
+
+# this is for the gram panchayat module, i made it a while ago, not for stalk collector    
+@app.route('/add_request', methods=['GET', 'POST'])
+def request_generator():
+    if g.user and g.user[4] == 'G':
         farmers = Farmer.query.filter_by(request_harvest = 0).all()
         if flask.request.method == 'POST':
             returned_values = request.form.getlist('request')
@@ -235,13 +236,12 @@ def reqgen():
                     db.session.add(job)
                     db.session.commit()
         farmers = Farmer.query.filter_by(request_harvest = 0).all()       
-        return render_template('/stalk_collector/add_req.html', data=farmers)
+        return render_template('/add_req.html', data=farmers)
     else:
         return render_template('404.html')
 
 @app.route('/stalk_collector/stalkcol', methods=['GET','POST'])
 def stalk():
-    id = 'CH13S0025'
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':
             j_id = request.form.getlist('j_no')
@@ -254,8 +254,9 @@ def stalk():
                     l.bales_collected = b
                     l.fees = (l.farm_size*400)
                     db.session.commit()
+        id = 'CH13S0025'          
         jl=Job_List.query.filter_by(collector_id=id).all()
-        if len(jl) != 0:   
+        if len(jl) != 0:
             return render_template('/stalk_collector/stalk_collector.html', data=jl)
         return render_template('/stalk_collector/stalk_collector.html', data=0)
     else:
@@ -272,7 +273,7 @@ def job_comp():
                     l.job_complete = 1
                     print('l.job_complete')
                     db.session.commit()
-        return redirect('/stalk_collector/stalkcol')     
+        return redirect('/stalk_collector/stalkcol')
     else:
         return render_template('404.html')
         
