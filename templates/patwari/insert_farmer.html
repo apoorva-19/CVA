@@ -9,7 +9,7 @@
                 </h2>
             </div>
             <div class="body">
-                <form method="POST">
+                <form method="POST" action= {{ url_for('insert_farmer') }}>
                     <div class="row">
                         <div class="col-md-6 col-12">
                             <label for="name">Name</label>
@@ -63,6 +63,7 @@
                             <select class="form-control form-line" id="state" name="state">
                                 {% for key, value in state %}
                                 <option value="{{ key }}">{{ value }}</option>
+                                <input type="hidden", value= {{ key }}, name = "State">
                                 {% endfor%}
                             </select>
                         </div>
@@ -71,6 +72,7 @@
                             <select class="form-control form-line" id="district_name" name="district_name">
                                 {% for key, value in district_name %}
                                 <option value="{{ key }}">{{ value }}</option>
+                                <input type="hidden", value= {{ value }}, name = "District">
                                 {% endfor%}
                             </select>
                         </div>

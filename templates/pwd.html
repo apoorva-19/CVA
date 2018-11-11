@@ -1,0 +1,10 @@
+<html> 
+    {% if data == 0:%}
+    <form method = "POST" action = {{ url_for('genhash')}}>
+        password to generate hash<input type="text" name="pwd">
+    </form>
+    {%endif%}
+    {% if data != 0:%}
+        the hashed password is: {{ data }}
+    {%endif%}    
+</html>
