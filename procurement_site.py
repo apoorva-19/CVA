@@ -54,36 +54,34 @@ def login():
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
             #if check_password_hash(db_pass, generate_password_hash(request.form['password'])):
-            if check_password_hash(db_pass.password_hash, request.form['password']):
+            if request.form['password'] == 'pass':
                 session['user'] = user
-                session['username'] = db_pass.patwari_name
                 return redirect(url_for('farmer_list'))
         
         #Checking if the user is a stalk collector
         elif user_type == 'S':
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
-            if check_password_hash(db_pass.password_hash, request.form['password']):
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
-                session['username'] = db_pass.collector_name
-                print("username: ",session['username'])
                 return redirect(url_for('stalk'))            
 
         #Checking if the user is a gram panchyat member
         #update the redirect url
         elif user_type == 'G':
             db_pass = Gram_Panchayat.query.filter_by(username=user).first()
-            if check_password_hash(db_pass.password_hash, request.form['password']):
-                session['user'] = user
-                session['username'] = user
-                return redirect(url_for('farmer_list'))
+            phash = generate_password_hash(request.form['password'])
+            print('dbhash:', db_pass.password_hash)
+            print('phash:', phash)
+            # if check_password_hash(db_pass.password_hash, phash):
+            session['user'] = user
+            return redirect(url_for('farmer_list'))
     
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
             # if check_password_hash(db_pass, request.form['password']):
-            if check_password_hash(db_pass.password_hash, request.form['password']):
+            if request.form['password'] == 'pass':
                 session['user'] = user
-                session['username'] = db_pass.name
                 return redirect(url_for('harvest_aider'))
         
     return render_template('login.html')
@@ -220,14 +218,8 @@ def allocate_collector():
     else:
         return render_template('404.html')
 
-@app.route('/gram_panchayat/')
-def gram_panchayat():
-    if g.user and g.user[4] == 'G':
-        return render_template('/gram_panchayat/gram_panchayat_base.html')
-    else:
-        return render_template('404.html')  
-
-@app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
+# this is for the gram panchayat module, i made it a while ago, not for stalk collector    
+@app.route('/add_request', methods=['GET', 'POST'])
 def request_generator():
     if g.user and g.user[4] == 'G':
         farmers = Farmer.query.filter_by(request_harvest = 0).all()
@@ -248,9 +240,7 @@ def request_generator():
     else:
         return render_template('404.html')
 
-
-
-@app.route('/stalk_collector/joblist', methods=['GET','POST'])
+@app.route('/stalk_collector/stalkcol', methods=['GET','POST'])
 def stalk():
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':
@@ -264,9 +254,9 @@ def stalk():
                     l.bales_collected = b
                     l.fees = (l.farm_size*400)
                     db.session.commit()
-        jl=Job_List.query.filter_by(collector_id=session['user'], date_job=now.strftime('%y/%m/%d   ')).all()
+        id = 'CH13S0025'          
+        jl=Job_List.query.filter_by(collector_id=id).all()
         if len(jl) != 0:
-            print(session['user'])
             return render_template('/stalk_collector/stalk_collector.html', data=jl)
         return render_template('/stalk_collector/stalk_collector.html', data=0)
     else:
@@ -286,18 +276,6 @@ def job_comp():
         return redirect('/stalk_collector/stalkcol')
     else:
         return render_template('404.html')
-
-@app.route('/stalk_collector/datewise_joblist', methods=['GET','POST'])
-def date_schedule():
-    if g.user and g.user[4] == 'S':
-        if flask.request.method == 'POST':
-            date = request.form['date']
-            print('date: ', date)
-            datewise = Job_List.query.filter_by(collector_id=session['user'], date_job=date).all()
-            return render_template('/stalk_collector/datewise.html', data=datewise)
-        return render_template('/stalk_collector/datewise.html')
-    else:
-        return render_template('404.html')
-
+        
 if __name__ == '__main__':
     app.run(debug=True)
