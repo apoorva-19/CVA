@@ -73,8 +73,7 @@
                     <img src="{{ url_for('static',filename='images/user.png') }}" width="48" height="48" alt="User" />
                 </div>
                 <div class="info-container">
-                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apoorva
-                        Maheshwari</div>
+                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{% print(session['username']) %}</div>
                     <div class="btn-group user-helper-dropdown">
                         <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
                         <ul class="dropdown-menu pull-right">
@@ -88,6 +87,19 @@
             <!-- Menu -->
             <div class="menu">
                 <ul class="list">
+                    <li class="header">MAIN NAVIGATION</li>
+                    <li id="home">
+                        <a href={{ url_for('stalk') }}>
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
+                        </a>
+                    </li>    
+                    <li id="home">
+                            <a href={{ url_for('date_schedule') }}>
+                                <i class="material-icons">view_day</i>
+                                <span>Check jobs by date</span>
+                            </a>
+                        </li>                        
                 </ul>
             </div>
             <!-- #Menu -->
@@ -112,53 +124,6 @@
             {% endblock %}
         </div>
     </section>
-
-    <div class="modal fade" id="allocate" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="alocateLabel">Allocate Collectors</h4>
-                </div>
-                <div class="modal-body">
-                    Would you like to allocate Collectors?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
-                    <button type="button" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="requesting_truck" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Request Collection of Stalk Bales</h4>
-                </div>
-                <div class="modal-body">
-                    <form method="POST">
-                        <label for="stalk_no">Bales of Stalk</label>
-                        <div class="form-group">
-                            <div class="form-line">
-                                <input type="text" id="stalk_no" name="stalk_no" class="form-control" placeholder="Enter the number of bales">
-                            </div>
-                        </div>
-                        <label for="collection_date">Date of Collection</label>
-                        <div class="form-group">
-                            <div class="form-line">
-                                <input type="date" id="collection_date" name="collection_date" class="form-control">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <!-- <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button> -->
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 
@@ -167,7 +132,7 @@
     <script src="{{ url_for('static',filename='plugins/bootstrap/js/bootstrap.js') }}"></script>
 
     <!-- Select Plugin Js -->
-    <!-- <script src="{{ url_for('static',filename='plugins/bootstrap-select/js/bootstrap-select.js') }}"></script> -->
+    <script src="{{ url_for('static',filename='plugins/bootstrap-select/js/bootstrap-select.js') }}"></script>
 
     <!-- Slimscroll Plugin Js -->
     <script src="{{ url_for('static',filename='plugins/jquery-slimscroll/jquery.slimscroll.js') }}"></script>
@@ -180,6 +145,13 @@
 
     <!-- Sparkline Chart Plugin Js -->
     <script src="{{ url_for('static',filename='plugins/jquery-sparkline/jquery.sparkline.js') }}"></script>
+
+    <!-- Moment Plugin Js -->
+    <script src="{{ url_for('static', filename='plugins/momentjs/moment.js') }}"></script>
+
+    <!-- Bootstrap Material Datetime Picker Plugin Js -->
+    <script src="{{ url_for('static', filename='plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js') }}"></script>
+    
     <!-- Custom Js -->
     <script src="{{ url_for('static',filename='js/admin.js') }}"></script>
     <script src="{{ url_for('static',filename='js/pages/index.js') }}"></script>

@@ -1,0 +1,70 @@
+{%extends "/stalk_collector/stalk_collector_base.html"%}
+{%block content%}
+<div class="row-clearfix">
+    <div class="col-lg-12 col-md-4 col-sm-6 col-xs-12">
+        <div class="card">
+            <div class="header">   
+                <h4>Datewise Schedule </h4>
+            </div>    
+            <div class="body">
+                <div class="col-md-6">    
+                    <form method="POST" action= {{ url_for('date_schedule') }} class="form-horizontal">
+                        <div class="form-group">
+                                <input type="date" class="form-control" placeholder="date" name = "date">
+                                <br>
+                                <button type="submit" class="btn btn-success waves-effect">Check Schedule</button>
+                                <br>
+                            </div>
+                        </div>
+                    </form> 
+                </div>       
+                <br>    
+                <br>
+                <br>
+                <br> 
+            </div>           
+                {%if data != 0:%}
+                    {% for j in data: %} 
+                        {%if j.job_complete == 0%}
+                            <div class="row clearfix">    
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <div class="card">
+                                        <div class="header">
+                                            <h2>
+                                                JOB {{ j.job_no }}
+                                            </h2>
+                                        </div>
+                                        <div class="body">
+                                            Farmer id: {{ j.farmer_id }}
+                                            <br>
+                                            Farm Size: {{ j.farm_size }}
+                                            <br>
+                                            Date of job: {{ j.date_job }}
+                                            <br>
+                                            Time: {{ j.time }} 
+                                            <br>
+                                            Time Reqd: {{'%0.1f' % j.expected_duration }} hrs
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>    
+                        {%endif%}
+                    {%endfor%} 
+                   
+                {%else:%}
+                <div class="row clearfix">    
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="card">
+                            <div class="header">
+                                <h2>
+                                    NO JOBS
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {%endif%}                   
+        </div>           
+    </div>
+</div>   
+{%endblock%}
