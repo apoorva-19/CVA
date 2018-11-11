@@ -214,13 +214,12 @@ def allocate_collector():
                     farmer.equip_id = list_eqiup[j].equip_id
                     list_collector[i].hours_completed_today += farmer.expected_duration
                     list_eqiup[j].hours_completed_today += farmer.expected_duration
-
         db.session.commit()
     else:
         return render_template('404.html')
 
 # this is for the gram panchayat module, i made it a while ago, not for stalk collector    
-@app.route('/gram_panchayat/add_request', methods=['GET', 'POST'])
+@app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
 def request_generator():
     if g.user and g.user[4] == 'G':
         farmers = Farmer.query.filter_by(request_harvest = 0).all()
@@ -237,11 +236,11 @@ def request_generator():
                     db.session.add(job)
                     db.session.commit()
         farmers = Farmer.query.filter_by(request_harvest = 0).all()       
-        return render_template('/gram_panchayat/add_req.html', data=farmers)
+        return render_template('/gram_panchayat/add_req.html/', data=farmers)
     else:
         return render_template('404.html')
 
-@app.route('/stalk_collector/joblist', methods=['GET','POST'])
+@app.route('/stalk_collector/joblist/', methods=['GET','POST'])
 def stalk():
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':
@@ -262,7 +261,7 @@ def stalk():
     else:
         return render_template('404.html')
 
-@app.route('/stalk_collector/datewise_joblist', methods=['GET', 'POST'])
+@app.route('/stalk_collector/datewise_joblist/', methods=['GET', 'POST'])
 def date_schedule():
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':
@@ -273,7 +272,7 @@ def date_schedule():
     else:
         return render_template('404.html')  
 
-@app.route('/stalk_collector/finjobs', methods=['GET', 'POST'])
+@app.route('/stalk_collector/finjobs/', methods=['GET', 'POST'])
 def job_comp():
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':

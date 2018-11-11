@@ -73,7 +73,12 @@
                     <img src="{{ url_for('static',filename='images/user.png') }}" width="48" height="48" alt="User" />
                 </div>
                 <div class="info-container">
+<<<<<<< HEAD
                     <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ session['username'] }}</div>
+=======
+                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apoorva
+                        Maheshwari</div>
+>>>>>>> d941ad09b23b61c864b4fd6d3cc603c9b2c661d0
                     <div class="btn-group user-helper-dropdown">
                         <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
                         <ul class="dropdown-menu pull-right">
@@ -87,6 +92,7 @@
             <!-- Menu -->
             <div class="menu">
                 <ul class="list">
+<<<<<<< HEAD
                         <li class="header">MAIN NAVIGATION</li>
                         <li id="home">
                             <a href={{ url_for('stalk') }}>
@@ -101,6 +107,8 @@
                             </a>
                         </li>
     
+=======
+>>>>>>> d941ad09b23b61c864b4fd6d3cc603c9b2c661d0
                 </ul>
             </div>
             <!-- #Menu -->
@@ -126,6 +134,55 @@
         </div>
     </section>
 
+<<<<<<< HEAD
+=======
+    <div class="modal fade" id="allocate" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="alocateLabel">Allocate Collectors</h4>
+                </div>
+                <div class="modal-body">
+                    Would you like to allocate Collectors?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
+                    <button type="button" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="requesting_truck" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Request Collection of Stalk Bales</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        <label for="stalk_no">Bales of Stalk</label>
+                        <div class="form-group">
+                            <div class="form-line">
+                                <input type="text" id="stalk_no" name="stalk_no" class="form-control" placeholder="Enter the number of bales">
+                            </div>
+                        </div>
+                        <label for="collection_date">Date of Collection</label>
+                        <div class="form-group">
+                            <div class="form-line">
+                                <input type="date" id="collection_date" name="collection_date" class="form-control">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+>>>>>>> d941ad09b23b61c864b4fd6d3cc603c9b2c661d0
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 
