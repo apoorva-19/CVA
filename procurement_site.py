@@ -120,7 +120,7 @@ def insert_farmer():
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
         if flask.request.method = "POST":
-            new = 
+            # new = 
         return render_template('/patwari/insert_farmer.html', state=list(zip(state.values(), state.keys())), district_name=district_name)
     else:
         return render_template('404.html')
