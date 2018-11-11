@@ -56,26 +56,33 @@
                 </h2>
             </div>
             <div class="body">
-                <form method="POST">
-                    <label for="name">Name</label>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter the name">
+                <form id="add_col" method='POST' action="{{ url_for('add_collector') }}">
+                    <div class="row clearfix form-group">
+                        <div class="col-md-6">
+                            <label for="name">Name</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter the name">
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <label for="contact_no">Contact Number</label>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <input type="text" id="contact_no" name="contact_no" class="form-control" placeholder="Enter the contact number">
+                        <div class="col-md-6">
+                            <label for="contact_no">Contact Number</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" id="contact_no" name="contact_no" class="form-control"
+                                        placeholder="Enter the contact number">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row clearfix form-group">
                         <div class="col-md-6">
                             <label for="state">State</label>
                             <select class="form-control form-line" id="state" name="state">
-                               {% for key, value in state %}
-                               <option value="{{ key }}">{{ value }}</option>
-                               {% endfor%}
+                                {% for key, value in state %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor%}
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -87,7 +94,7 @@
                             </select>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary m-t-15 waves-effect">Submit</button>
+                    <button type="submit" class="btn btn-primary m-t-15 waves-effect">Submit</button>
                 </form>
             </div>
         </div>
@@ -97,20 +104,20 @@
 <script>
     var state_select = document.getElementById("state");
     var city_select = document.getElementById("district_name");
-    state_select.onchange = function()  {
-         
+    state_select.onchange = function () {
+
         state = state_select.value;
-        
-        fetch('/harvest_aider/add_collector/' + state).then(function(response) {
+
+        fetch('/harvest_aider/add_collector/' + state).then(function (response) {
             console.log(response)
-            response.json().then(function(data) {
+            response.json().then(function (data) {
                 var optionHTML = '';
                 for (var city of data.cities) {
                     optionHTML += '<option value=' + city.id + '>' + city.name + '</option>';
                 }
                 city_select.innerHTML = optionHTML;
             })
-            
+
         });
     }
 
