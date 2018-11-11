@@ -1,4 +1,9 @@
 code = {
+    "AN":[
+            "Nicobar",
+            "North and Middle Andaman",
+            "South Andaman"
+        ],
     "AP":[  
             "Anantapur",
             "Chittoor",
