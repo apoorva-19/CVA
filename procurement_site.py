@@ -55,7 +55,6 @@ def login():
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
-                session['username'] = db_pass.patwari_name
                 return redirect(url_for('farmer_list'))
         
         #Checking if the user is a stalk collector
@@ -82,7 +81,6 @@ def login():
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
-                session['username'] = db_pass.name
                 return redirect(url_for('harvest_aider'))
         
     return render_template('login.html')
