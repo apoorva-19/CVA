@@ -23,8 +23,7 @@
                             <label for="size">Farm Size (in acres)</label>
                             <div class="form-group">
                                 <div class="form-line">
-                                    <input type="number" id="size" name="size" class="form-control" placeholder="Enter the size"
-                                        min=0.1>
+                                    <input type="text" id="size" name="size" class="form-control" placeholder="Enter the size" pattern="^\d*(\.\d{0,2})?$">
                                 </div>
                             </div>
                         </div>
@@ -77,7 +76,7 @@
                             </select>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary m-t-15 waves-effect">Submit</button>
+                    <button type="submit" class="btn btn-primary m-t-15 waves-effect">Submit</button>
                 </form>
             </div>
         </div>

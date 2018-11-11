@@ -14,6 +14,8 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+from werkzeug.security import generate_password_hash
+
 app = Flask(__name__)
 # bcrypt = Bcrypt(app)
 
@@ -35,8 +37,9 @@ class Patwari(db.Model):
     state = db.Column(db.String(2))
     contact_no = db.Column(db.String(10), unique=True, index=True)
 
-    def __init__(self, patwari_id, patwari_name, district_name, state, contact_no):
+    def __init__(self, patwari_id, password, patwari_name, district_name, state, contact_no):
         self.patwari_id = patwari_id
+        self.password_hash = generate_password_hash(password)
         self.patwari_name = patwari_name
         self.district_name = district_name
         self.state = state
@@ -56,7 +59,7 @@ class Farmer(db.Model):
     state = db.Column(db.String(2))
     request_harvest = db.Column(db.Integer, default=0)
 
-    def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state, request_harvest):
+    def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state):
         self.farmer_id = farmer_id
         self.farmer_name = farmer_name
         self.farm_size = farm_size
@@ -65,7 +68,6 @@ class Farmer(db.Model):
         self.village_name = village_name
         self.district_name = district_name
         self.state = state
-        self.request_harvest = request_harvest
 
     def __repr__(self):
         print (f"Farmer id {self.farmer_id}, Farmer name {self.farmer_name}")
@@ -114,12 +116,13 @@ class Stalk_Collector(db.Model):
     hours_of_work = db.Column(db.Integer, server_default='0')
     hours_completed_today = db.Column(db.Integer, server_default='0')
     
-    def __init__(self, collector_id, collector_name, contact_no, hours_of_work, hours_completed_today):
+    def __init__(self, collector_id, password, collector_name, district_name, state,contact_no,):
         self.collector_id = collector_id
+        self.password_hash = generate_password_hash(password)
         self.collector_name = collector_name
         self.contact_no = contact_no
-        self.hours_of_work = hours_of_work
-        self.hours_completed_today = hours_completed_today
+        self.district_name = district_name
+        self.state = state
 
 class Gram_Panchayat(db.Model):
 
@@ -136,7 +139,7 @@ class Gram_Panchayat(db.Model):
 
     def __init__(self, username, password, name, contact_no, email_id, village_name, district_name, state):
         self.username = username
-        self.password = password
+        self.password_hash = generate_password_hash(password)
         self.name = name
         self.contact_no = contact_no
         self.email_id = email_id
@@ -211,7 +214,7 @@ class Harvest_Aider(db.Model):
 
     def __init__(self, aider_id, password, name, contact_no, district, state, no_villages):
         self.aider_id = aider_id
-        self.password = password
+        self.password_hash = generate_password_hash(password)
         self.name = name
         self.contact_no = contact_no
         self.district = district

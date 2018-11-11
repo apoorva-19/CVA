@@ -3,17 +3,20 @@ import json
 import datetime
 import schedule
 import time
+
 import flask
 from flask import send_from_directory
 from flask import Flask, render_template, url_for, redirect, request, session, g
 from flask_migrate import Migrate
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 import models
 from models import app, db
 from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider
 
 from state_district import code, state
+from id_count import FA, SC, HA, EQ, PW, JC, GP
+
 Migrate(app, db)
 now = datetime.datetime.now()
 
@@ -30,6 +33,12 @@ def set_completed_hours():
         equip.hours_completed_today = 0
     db.session.commit()
 
+#generate new id
+def gen_new_id(state, district_no, type, id_number):
+    #For example: MH06J000023
+    new_id = state+str(district_no).zfill(2)+type+str(id_number).zfill(6)
+    return new_id
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
@@ -43,33 +52,22 @@ def login():
         user_type = user[4]
         #Checking if the user is a patwari
         if user_type == 'P':
-            print('P')
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
             #if check_password_hash(db_pass, generate_password_hash(request.form['password'])):
-            # if request.form['password'] == 'pass':
-            session['user'] = user
-            return redirect(url_for('farmer_list'))
+            if request.form['password'] == 'pass':
+                session['user'] = user
+                return redirect(url_for('farmer_list'))
         
         #Checking if the user is a stalk collector
-        #update the redirect url
         elif user_type == 'S':
-            print('S')
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
-            # phash = generate_password_hash(request.form['password'])
-            # print('dbhash:', db_pass.password_hash)
-            # print('input password:', request.form['password'])
-            # print('phash:', phash)
-            # if check_password_hash(db_pass.password_hash,phash):
-            # print('pwd correct')
-            session['user'] = user
-            return redirect(url_for('stalk'))
-            # else:
-                #  print('pwd wrong')
+            if check_password_hash(db_pass.password_hash,request.form['password']):
+                session['user'] = user
+                return redirect(url_for('stalk'))            
 
         #Checking if the user is a gram panchyat member
         #update the redirect url
         elif user_type == 'G':
-            print('G')
             db_pass = Gram_Panchayat.query.filter_by(username=user).first()
             phash = generate_password_hash(request.form['password'])
             print('dbhash:', db_pass.password_hash)
@@ -80,9 +78,8 @@ def login():
     
         #Checking if the user is a harvest aider
         elif user_type == 'A':
-            print('A')
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            #if check_password_hash(db_pass, generate_password_hash(request.form['password'])):
+            # if check_password_hash(db_pass, request.form['password']):
             if request.form['password'] == 'pass':
                 session['user'] = user
                 return redirect(url_for('harvest_aider'))
@@ -107,20 +104,28 @@ def before_request():
 @app.route('/patwari/')
 def farmer_list():
     if g.user and g.user[4] == 'P':
-        farmers = Farmer.query.filter((Farmer.district_name == 'Raipur'), (Farmer.state == 'CH'))
+        farmers = Farmer.query.filter((Farmer.district_name == 'Pune'), (Farmer.state == 'MH'))
         return render_template('/patwari/index.html', farmerlist=farmers)
     else:
         return render_template('404.html')
 
 #Insertion of new farmer by the patwari
-@app.route('/patwari/insert_farmer/')
+@app.route('/patwari/insert_farmer/', methods=['GET', 'POST'])
 def insert_farmer():
     if g.user and g.user[4] == 'P':
-        district = code.get('AP')
+        if request.method == 'POST':        
+            #Generating a new id for the farmer
+            new_id = gen_new_id(request.form['state'], request.form['district_name'], 'F', FA.get(request.form['state'])[int(request.form['district_name'])]+1 )
+            #Inserting the farmer details into the database
+            print(request.form['size'])
+            new_farmer = Farmer(new_id, request.form['name'], request.form['size'], request.form['contact_no'], request.form['aadhar_no'], request.form['village_name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'])
+            db.session.add(new_farmer)
+            db.session.commit()
+
+        district = code.get('AN')
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
-        if flask.request.method = "POST":
-            # new = 
+
         return render_template('/patwari/insert_farmer.html', state=list(zip(state.values(), state.keys())), district_name=district_name)
     else:
         return render_template('404.html')
@@ -139,12 +144,21 @@ def harvest_aider():
         return render_template('404.html')
 
 #New collectors added by the harvest aider    
-@app.route('/harvest_aider/add_collector/')
+@app.route('/harvest_aider/add_collector/', methods=['GET', 'POST'])
 def add_collector():
     if g.user and g.user[4] == 'A':
-        district = code.get('AP')
+        if request.method == 'POST':        
+            #Generating a new id for the stalk collector
+            new_id = gen_new_id(request.form['state'], request.form['district_name'], 'S', SC.get(request.form['state'])[int(request.form['district_name'])]+1 )
+            #Inserting the stalk collector details into the database
+            new_collector = Stalk_Collector(new_id, 'pass', request.form['name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'], request.form['contact_no'])
+            db.session.add(new_collector)
+            db.session.commit()
+            
+        district = code.get('AN')
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
+
         return render_template('/harvest_aider/add_collector.html', state=list(zip(state.values(), state.keys())), district_name=district_name)
     else:
         return render_template('404.html')
@@ -153,7 +167,6 @@ def add_collector():
 @app.route('/harvest_aider/add_collector/<state>')
 def city(state):
     district = code.get(state)
-    print(district)
     ind = list(range(1, len(district)+1))
     district_name = list(zip(ind, district))
 
@@ -205,25 +218,28 @@ def allocate_collector():
     else:
         return render_template('404.html')
     
-@app.route('/addreq', methods=['GET', 'POST'])
+@app.route('/stalk_collector/add_request/', methods=['GET', 'POST'])
 def reqgen():
-    farmers = Farmer.query.filter_by(request_harvest = 0).all()
-    if flask.request.method == 'POST':
-        returned_values = request.form.getlist('request')
-        for i in returned_values:
-            print(i)
-            val = Farmer.query.filter_by(farmer_id  = i).all()
-            for v in val:
-                v.request_harvest = 1
-                j_id = v.state+v.farmer_id
-                exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
-                job = Job_List(j_id, v.farmer_id, '1', v.village_name, v.farm_size, 0, exp_dur)
-                db.session.add(job)
-                db.session.commit()
-    farmers = Farmer.query.filter_by(request_harvest = 0).all()       
-    return render_template('add_req.html', data=farmers)
+    if g.user and g.user[4] == 'S':
+        farmers = Farmer.query.filter_by(request_harvest = 0).all()
+        if flask.request.method == 'POST':
+            returned_values = request.form.getlist('request')
+            for i in returned_values:
+                print(i)
+                val = Farmer.query.filter_by(farmer_id  = i).all()
+                for v in val:
+                    v.request_harvest = 1
+                    j_id = v.state+v.farmer_id
+                    exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
+                    job = Job_List(j_id, v.farmer_id, '1', v.village_name, v.farm_size, 0, exp_dur)
+                    db.session.add(job)
+                    db.session.commit()
+        farmers = Farmer.query.filter_by(request_harvest = 0).all()       
+        return render_template('/stalk_collector/add_req.html', data=farmers)
+    else:
+        return render_template('404.html')
 
-@app.route('/stalkcol', methods=['GET','POST'])
+@app.route('/stalk_collector/stalkcol', methods=['GET','POST'])
 def stalk():
     id = 'CH13S0025'
     if g.user and g.user[4] == 'S':
@@ -242,28 +258,23 @@ def stalk():
         if len(jl) != 0:   
             return render_template('/stalk_collector/stalk_collector.html', data=jl)
         return render_template('/stalk_collector/stalk_collector.html', data=0)
+    else:
+        return render_template('404.html')
 
-@app.route('/finjobs', methods=['GET', 'POST'])
+@app.route('/stalk_collector/finjobs', methods=['GET', 'POST'])
 def job_comp():
-    if flask.request.method == 'POST':
-        jobs = request.form.getlist('j')
-        for j in jobs:
-            jlist = Job_List.query.filter_by(job_no = j).all()
-            for l in jlist:
-                l.job_complete = 1
-                print('l.job_complete')
-                db.session.commit()
-    return redirect('/stalkcol')     
-
-@app.route('/genhash', methods=['GET', 'POST'])
-def genhash():
-    if flask.request.method == 'POST':
-        pwd = request.form['pwd']
-        print('inserted pwd: ', pwd)
-        pas = generate_password_hash(pwd)
-        print("len:", len(pas))
-        return render_template("pwd.html", data=pas)
-    return render_template("pwd.html", data=0)
-
+    if g.user and g.user[4] == 'S':
+        if flask.request.method == 'POST':
+            jobs = request.form.getlist('j')
+            for j in jobs:
+                jlist = Job_List.query.filter_by(job_no = j).all()
+                for l in jlist:
+                    l.job_complete = 1
+                    print('l.job_complete')
+                    db.session.commit()
+        return redirect('/stalk_collector/stalkcol')     
+    else:
+        return render_template('404.html')
+        
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True)
