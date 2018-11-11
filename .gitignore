@@ -11,5 +11,5 @@ pyvenv.cfg
 .venv
 pip-selfcheck.json
 .vscode
-__pycache__
-migrations
+__pycache__/
+migrations/
