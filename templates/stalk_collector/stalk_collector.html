@@ -1,4 +1,4 @@
-{%extends "base.html"%}
+{%extends "/stalk_collector/stalk_collector_base.html"%}
 {%block content%}
     {%if data == 0:%}
     <div class="row-clearfix">
@@ -31,8 +31,8 @@
                                 Time: {{ j.time }} 
                                 <br>
                                 Time Reqd: {{'%0.1f' % j.expected_duration }} hrs
-                                {% if j.bails_collected == 0%}
-                                <form method="POST" action= {{url_for('stalk') }} class="form-horizontal">
+                                {% if j.bales_collected == 0%}
+                                <form method="POST" action= {{ url_for('stalk') }} class="form-horizontal">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <div class="form-line">
@@ -54,9 +54,9 @@
                                 </form>
 
                                 {%endif%}
-                                {%if j.bails_collected != 0%}   
+                                {%if j.bales_collected != 0%}   
                                     <br>
-                                    Bales collected: {{ j.bails_collected }}
+                                    Bales collected: {{ j.bales_collected }}
                                     <br>
                                     Fees to collect: {{ j.fees }}
                                     <form method="POST" action= {{ url_for('job_comp') }} class="form-horizontal">

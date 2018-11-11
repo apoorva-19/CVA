@@ -15,6 +15,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+# bcrypt = Bcrypt(app)
 
 app.config['SECRET_KEY'] = 'mysecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -149,10 +150,7 @@ class Request_Harvest(db.Model):
 
     request_id = db.Column(db.Integer, primary_key=True)
     requestor_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
-<<<<<<< HEAD
-=======
     req_gen = db.relationship('Gram_Panchayat', backref='request_harvest', uselist=False, foreign_keys=[requestor_id])
->>>>>>> Era
     no_farmers = db.Column(db.Integer)
     date_request = db.Column(db.Date)
     jobs_completed = db.Column(db.Integer, server_default='0')
@@ -171,10 +169,7 @@ class Request_user_id(db.Model):
     new_user_id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     req_gen_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
-<<<<<<< HEAD
-=======
     req_gen = db.relationship('Gram_Panchayat', backref='request_user_id', uselist=False, foreign_keys=[req_gen_id])
->>>>>>> Era
     no_gen = db.Column(db.Integer)
     req_complete = db.Column(db.Integer, server_default='0')
     req_gen = db.relationship(Gram_Panchayat, backref='request_user_id', uselist=False, foreign_keys=req_gen_id)
