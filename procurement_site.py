@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from werkzeug.security import check_password_hash
 import models
 from models import app, db
-from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id
+from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Stalk_Collection
 
 from state_district import code, state
 
@@ -100,9 +100,9 @@ def login():
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            # if check_password_hash(db_pass.password_hash,request.form['password']):
-            if request.form['password'] == 'pass':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
+                session['username'] = db_pass.name
                 return redirect(url_for('harvest_aider'))
         
     return render_template('login.html')
@@ -237,6 +237,15 @@ def allocate_collector():
         db.session.commit()
     else:
         return render_template('404.html')
+
+@app.route('/harvest_aider/collection_request', methods=['GET', 'POST'])
+def collection_request():
+    date = request.form['date']
+    bales = request.form['bales']
+    new_req = Factory_Stalk_Collection(date, bales, 0)
+    db.session.add(new_req)
+    db.session.commit()
+    return redirect('/harvest_aider/add_collector')
 
 # this is for the gram panchayat module, i made it a while ago, not for stalk collector    
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])

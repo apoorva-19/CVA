@@ -193,12 +193,9 @@ class Factory_Stalk_Collection(db.Model):
     no_trucks = db.Column(db.Integer)
     amt_received = db.Column(db.Integer)
 
-    def __init__(self, request_id, date_request, bales_stalk, no_trucks):
-        self.request_id = request_id
+    def __init__(self, date_request, bales_stalk):
         self.date_request = date_request
         self.bales_stalk = bales_stalk
-        self.no_trucks = no_trucks
-
 class Harvest_Aider(db.Model):
 
     __tablename__ = 'harvest_aider'
