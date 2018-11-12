@@ -17,7 +17,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
-# bcrypt = Bcrypt(app)
 
 app.config['SECRET_KEY'] = 'mysecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -252,3 +251,19 @@ class Job_List(db.Model):
         self.farm_size = farm_size
         self.fees = fees
         self.expected_duration = expected_duration
+
+class User_Id(db.Model):
+
+    __tablename__='user_id'
+
+    state_district = db.Column(db.String(4), primary_key=True)
+    farmer_cnt = db.Column(db.Integer, server_default='0')
+    stalk_collector_cnt = db.Column(db.Integer, server_default='0')
+    harvest_aider_cnt = db.Column(db.Integer, server_default='0')
+    harvest_equip_cnt = db.Column(db.Integer, server_default='0')
+    gram_panchayat_cnt = db.Column(db.Integer, server_default='0')
+    job_cnt = db.Column(db.Integer, server_default='0')
+    patwari_cnt = db.Column(db.Integer, server_default='0')
+
+    def __init__(self, state_district):
+        self.state_district = state_district
