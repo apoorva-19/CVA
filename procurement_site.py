@@ -105,8 +105,13 @@ def login():
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
+<<<<<<< Updated upstream
             # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
             if request.form['password'] == 'pass':
+=======
+            # if check_password_hash(db_pass.password_hash,request.form['password']):
+            if request.form['password']=='pass':
+>>>>>>> Stashed changes
                 session['user'] = user
                 # session['username'] = db_pass.name
                 return redirect(url_for('harvest_aider'))
@@ -339,8 +344,44 @@ def job_comp():
                     db.session.commit()
         return redirect('/stalk_collector/stalkcol')
     else:
+        return render_template('404.html') 
+
+@app.route('/harvest_aider/equipment_maintenance/', methods=['GET', 'POST'])    
+def maintenance():
+    if g.user and g.user[4] == 'A':
+        equipment_names = db.session.query(Harvest_Equipment.name_equip).filter_by(available=0).all()
+        equipment_name_list = {}
+        for name in equipment_names:
+            equipment_name_list[name[0]] = ''
+        return render_template('/harvest_aider/equipment_maintenance.html', equipment_name_list=equipment_name_list)
+    else:
+        return render_template('404.html')
+
+
+@app.route('/harvest_aider/equipment_maintenance/<equip_name>', methods=['GET', 'POST'])
+def equipment_id(equip_name):
+    if g.user and g.user[4] == 'A':
+        equip_ids = db.session.query(Harvest_Equipment.equip_id).filter_by(name_equip=equip_name).all()
+        equip_ids_list = []
+        for equip_id in equip_ids:
+            equip_ids_list.append(equip_id[0])
+        return json.dumps(equip_ids_list)
+    else:
+        return render_template('404.html')
+
+
+@app.route('/harvest_aider/contact_details', methods=['GET', 'POST'])    
+def contact():
+    if g.user and g.user[4] == 'A':
+        id = request.form.get("equip_id")
+        #print(str(id))
+        details = Harvest_Equipment.query.filter((Harvest_Equipment.equip_id == id)) 
+        #print(str(details[0].servicing_comp))
+        return render_template('/harvest_aider/contact_details.html',details = details)    
+    else:
         return render_template('404.html')
         
+<<<<<<< Updated upstream
 @app.route('/factory_manager/')
 def factory_manager():
     if g.user and g.user[4] == 'M':
@@ -364,6 +405,8 @@ def todays_report():
         return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
     else:
         return render_template('404.html')
+=======
+>>>>>>> Stashed changes
 
 if __name__ == '__main__':
     app.run()

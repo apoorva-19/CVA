@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row clearfix">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                        <div class="header">
+                            <h2>
+                                ADVANCED SELECT                    
+                            </h2>
+                            <ul class="header-dropdown m-r--5">
+                                <li class="dropdown">
+                                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                        <i class="material-icons">more_vert</i>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right">
+                                        <li><a href="javascript:void(0);">Action</a></li>
+                                        <li><a href="javascript:void(0);">Another action</a></li>
+                                        <li><a href="javascript:void(0);">Something else here</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="body">
+                            <div class="row clearfix">
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>Equipment id</b>
+                                    </p>
+                                    <select class="form-control show-tick">
+                                        <option>Mustard</option>
+                                        <option>Ketchup</option>
+                                        <option>Relish</option>
+                                    </select>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>With OptGroups</b>
+                                    </p>
+                                    <select class="form-control show-tick">
+                                        <optgroup label="Picnic">
+                                            <option>Mustard</option>
+                                            <option>Ketchup</option>
+                                            <option>Relish</option>
+                                        </optgroup>
+                                        <optgroup label="Camping">
+                                            <option>Tent</option>
+                                            <option>Flashlight</option>
+                                            <option>Toilet Paper</option>
+                                        </optgroup>
+                                    </select>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>Multiple Select</b>
+                                    </p>
+                                    <select class="form-control show-tick" multiple>
+                                        <option>Mustard</option>
+                                        <option>Ketchup</option>
+                                        <option>Relish</option>
+                                    </select>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>With Search Bar</b>
+                                    </p>
+                                    <select class="form-control show-tick" data-live-search="true">
+                                        <option>Hot Dog, Fries and a Soda</option>
+                                        <option>Burger, Shake and a Smile</option>
+                                        <option>Sugar, Spice and all things nice</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row clearfix">
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>Max Selection Limit: 2</b>
+                                    </p>
+                                    <select class="form-control show-tick" multiple>
+                                        <optgroup label="Condiments" data-max-options="2">
+                                            <option>Mustard</option>
+                                            <option>Ketchup</option>
+                                            <option>Relish</option>
+                                        </optgroup>
+                                        <optgroup label="Breads" data-max-options="2">
+                                            <option>Plain</option>
+                                            <option>Steamed</option>
+                                            <option>Toasted</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>Display Count</b>
+                                    </p>
+                                    <select class="form-control show-tick" multiple data-selected-text-format="count">
+                                        <option>Mustard</option>
+                                        <option>Ketchup</option>
+                                        <option>Relish</option>
+                                        <option>Onions</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>With SubText</b>
+                                    </p>
+                                    <select class="form-control show-tick" data-show-subtext="true">
+                                        <option data-subtext="French's">Mustard</option>
+                                        <option data-subtext="Heinz">Ketchup</option>
+                                        <option data-subtext="Sweet">Relish</option>
+                                        <option data-subtext="Miracle Whip">Mayonnaise</option>
+                                        <option data-divider="true"></option>
+                                        <option data-subtext="Honey">Barbecue Sauce</option>
+                                        <option data-subtext="Ranch">Salad Dressing</option>
+                                        <option data-subtext="Sweet &amp; Spicy">Tabasco</option>
+                                        <option data-subtext="Chunky">Salsa</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <p>
+                                        <b>Disabled Option</b>
+                                    </p>
+                                    <select class="form-control show-tick">
+                                        <option>Mustard</option>
+                                        <option disabled>Ketchup</option>
+                                        <option>Relish</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock %}

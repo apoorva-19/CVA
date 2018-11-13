@@ -69,7 +69,7 @@ class Farmer(db.Model):
         self.state = state
 
     def __repr__(self):
-        print (f"Farmer id {self.farmer_id}, Farmer name {self.farmer_name}")
+        print ("Farmer id {1}, Farmer name {2}").format(self.farmer_id,self.farmer_name)
 
 class Harvest_Equipment(db.Model):
 
