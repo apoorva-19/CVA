@@ -182,8 +182,6 @@ class Request_user_id(db.Model):
         self.req_gen_id = req_gen_id
         self.no_gen = no_gen
 
-<<<<<<< HEAD
-=======
 class Factory_Stalk_Collection(db.Model):
 
     __tablename__ = 'factory_stalk_collection'
@@ -204,7 +202,6 @@ class Factory_Stalk_Collection(db.Model):
         self.village_name = village_name
         self.district_name = district_name
         self.state = state
->>>>>>> bc86d008ca0bdea0760955785ccec37305153441
 class Harvest_Aider(db.Model):
 
     __tablename__ = 'harvest_aider'
