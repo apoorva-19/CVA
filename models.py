@@ -187,15 +187,21 @@ class Factory_Stalk_Collection(db.Model):
     __tablename__ = 'factory_stalk_collection'
 
     request_id = db.Column(db.Integer, primary_key=True)
+    village_name = db.Column(db.String(20))
+    district_name = db.Column(db.String(25))
+    state = db.Column(db.String(2))
     date_request = db.Column(db.Date)
     date_fulfilment = db.Column(db.Date)
     bales_stalk = db.Column(db.Integer)
     no_trucks = db.Column(db.Integer)
     amt_received = db.Column(db.Integer)
 
-    def __init__(self, date_request, bales_stalk):
+    def __init__(self, date_request, bales_stalk, village_name, district_name, state):
         self.date_request = date_request
         self.bales_stalk = bales_stalk
+        self.village_name = village_name
+        self.district_name = district_name
+        self.state = state
 class Harvest_Aider(db.Model):
 
     __tablename__ = 'harvest_aider'

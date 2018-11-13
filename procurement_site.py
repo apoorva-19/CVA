@@ -9,7 +9,7 @@ from flask import send_from_directory
 from flask import Flask, render_template, url_for, redirect, request, session, g
 from flask_migrate import Migrate
 
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import models
 from models import app, db
 from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Stalk_Collection
@@ -240,30 +240,35 @@ def allocate_collector():
 
 @app.route('/harvest_aider/collection_request', methods=['GET', 'POST'])
 def collection_request():
-    date = request.form['date']
-    bales = request.form['bales']
-    new_req = Factory_Stalk_Collection(date, bales, 0)
-    db.session.add(new_req)
-    db.session.commit()
-    return redirect('/harvest_aider/add_collector')
+    if g.user and g.user[4] == 'A':
+        gp = Gram_Panchayat.query.filter_by(username=session['user']).first()
+        date = request.form['date']
+        bales = request.form['bales']
+        new_req = Factory_Stalk_Collection(date, bales, gp.village_name, gp.district_name, gp.state)
+        db.session.add(new_req)
+        db.session.commit()
+        return redirect('/harvest_aider/add_collector')
+    else:
+        return render_template('404.html')    
 
 # this is for the gram panchayat module, i made it a while ago, not for stalk collector    
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
 def request_generator():
     if g.user and g.user[4] == 'G':
-        farmers = Farmer.query.filter_by(request_harvest = 0).all()
+        gp = Gram_Panchayat.query.filter_by(userame=session['user']).first()
+        farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
         if flask.request.method == 'POST':
             returned_values = request.form.getlist('request')
             for i in returned_values:
-                val = Farmer.query.filter_by(farmer_id  = i).all()
+                val = Farmer.query.filter_by(farmer_id=i).all()
                 for v in val:
                     v.request_harvest = 1
                     j_id = v.state+v.farmer_id
                     exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
-                    job = Job_List(j_id, v.farmer_id, '1', v.village_name, v.farm_size, 0, exp_dur)
+                    job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, v.farm_size, 0, exp_dur)
                     db.session.add(job)
                     db.session.commit()
-        farmers = Farmer.query.filter_by(request_harvest = 0).all()       
+        farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
         return render_template('/gram_panchayat/add_req.html/', data=farmers)
     else:
         return render_template('404.html')
@@ -275,7 +280,7 @@ def joblist():
             j_id = request.form.getlist('j_no')
             no_bales = request.form.getlist('bales')
             for j, b in zip(j_id, no_bales):
-                jlist = Job_List.query.filter_by(job_no = j).all()
+                jlist = Job_List.query.filter_by(job_no=j).all()
                 for l in jlist:
                     l.bales_collected = b
                     l.fees = (l.farm_size*400)
@@ -311,6 +316,12 @@ def job_comp():
         return redirect('/stalk_collector/stalkcol')
     else:
         return render_template('404.html')
-        
+
+@app.route('/genhash', methods=['GET', 'POST'])
+def genhash():
+    if flask.request.method == 'POST':
+        pasw = generate_password_hash(request.form['hashval'])
+        return render_template('genhash.html', data=pasw)
+    return render_template('genhash.html')        
 if __name__ == '__main__':
     app.run(debug=True)
