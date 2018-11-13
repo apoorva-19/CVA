@@ -182,23 +182,6 @@ class Request_user_id(db.Model):
         self.req_gen_id = req_gen_id
         self.no_gen = no_gen
 
-class Factory_Stalk_Collection(db.Model):
-
-    __tablename__ = 'factory_stalk_collection'
-
-    request_id = db.Column(db.Integer, primary_key=True)
-    date_request = db.Column(db.Date)
-    date_fulfilment = db.Column(db.Date)
-    bales_stalk = db.Column(db.Integer)
-    no_trucks = db.Column(db.Integer)
-    amt_received = db.Column(db.Integer)
-
-    def __init__(self, request_id, date_request, bales_stalk, no_trucks):
-        self.request_id = request_id
-        self.date_request = date_request
-        self.bales_stalk = bales_stalk
-        self.no_trucks = no_trucks
-
 class Harvest_Aider(db.Model):
 
     __tablename__ = 'harvest_aider'
@@ -219,6 +202,26 @@ class Harvest_Aider(db.Model):
         self.district = district
         self.state = state
         self.no_villages = no_villages
+
+class Factory_Stalk_Collection(db.Model):
+
+    __tablename__ = 'factory_stalk_collection'
+
+    request_id = db.Column(db.Integer, primary_key=True)
+    requestor_id = db.Column(db.String(20), db.ForeignKey('harvest_aider.aider_id'))
+    district_name = db.Column(db.String(20))
+    date_request = db.Column(db.Date)
+    date_fulfilment = db.Column(db.Date)
+    bales_stalk = db.Column(db.Integer)
+    no_trucks = db.Column(db.Integer)
+    amt_received = db.Column(db.Integer, server_default='0')
+    requestor = db.relationship(Harvest_Aider, backref='factory_stalk_collection', uselist=False, foreign_keys=requestor_id)
+
+    def __init__(self, request_id, date_request, bales_stalk, no_trucks):
+        self.request_id = request_id
+        self.date_request = date_request
+        self.bales_stalk = bales_stalk
+        self.no_trucks = no_trucks
 
 class Job_List(db.Model):
     
@@ -267,3 +270,24 @@ class User_Id(db.Model):
 
     def __init__(self, state_district):
         self.state_district = state_district
+
+class Factory_Manager(db.Model):
+
+    __tablename__='factory_manager'
+
+    username = db.Column(db.String(20), primary_key=True)
+    password_hash = db.Column(db.String(128))
+    name = db.Column(db.String(30))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
+    email_id = db.Column(db.String(64), unique=True, index=True)
+    district_name = db.Column(db.String(25))
+    state = db.Column(db.String(2))
+
+    def __init__(self, username, password, name, contact_no, email_id, district_name, state):
+        self.username = username
+        self.password_hash = generate_password_hash(password)
+        self.name = name
+        self.contact_no = contact_no
+        self.email_id = email_id
+        self.district_name = district_name
+        self.state = state

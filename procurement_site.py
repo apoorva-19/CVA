@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from werkzeug.security import check_password_hash
 import models
 from models import app, db
-from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id
+from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Manager, Factory_Stalk_Collection
 
 from state_district import code, state
 
@@ -72,6 +72,7 @@ def login():
         session.pop('user', None)
         user = request.form['username']
         user_type = user[4]
+
         #Checking if the user is a patwari
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
@@ -86,7 +87,7 @@ def login():
                 session['user'] = user
                 session['username'] = db_pass.collector_name
 
-                return redirect(url_for('job_list'))            
+                return redirect(url_for('joblist'))            
 
         #Checking if the user is a gram panchyat member
         elif user_type == 'G':
@@ -100,10 +101,20 @@ def login():
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            # if check_password_hash(db_pass.password_hash,request.form['password']):
+            # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
             if request.form['password'] == 'pass':
                 session['user'] = user
+                # session['username'] = db_pass.name
                 return redirect(url_for('harvest_aider'))
+
+        #Checking if the user is a factory manager
+        elif user_type == 'M':
+            db_pass = Factory_Manager.query.filter_by(username=user).first()
+            # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
+            if request.form['password'] == 'pass':
+                session['user'] = user
+                # session['username'] = db_pass.name
+                return redirect(url_for('factory_manager'))        
         
     return render_template('login.html')
 
@@ -303,5 +314,29 @@ def job_comp():
     else:
         return render_template('404.html')
         
+@app.route('/factory_manager/')
+def factory_manager():
+    if g.user and g.user[4] == 'M':
+        complete_list = Factory_Stalk_Collection.query.filter_by(date_fulfilment=None)
+        return render_template('/factory_manager/index.html', c_list=complete_list)
+    else:
+        return render_template('404.html')
+
+@app.route('/factory_manager/report_generation/',methods=['GET', 'POST'])
+def report_generation():
+    if g.user and g.user[4] == 'M':
+        return render_template('/factory_manager/report_generation.html')
+    else:
+        return render_template('404.html')
+
+@app.route('/factory_manager/todays_collection/',methods=['GET', 'POST'])
+def todays_report():
+    if g.user and g.user[4] == 'M':
+        todays_list = Factory_Stalk_Collection.query.filter_by(date_fulfilment=now.strftime("%Y/%m/%d"))
+        # print(todays_list[0])
+        return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
+    else:
+        return render_template('404.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
