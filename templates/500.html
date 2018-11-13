@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>500 | Bootstrap Based Admin Template - Material Design</title>
+    <!-- Favicon-->
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+
+    <!-- Bootstrap Core Css -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/bootstrap/css/bootstrap.css') }}">
+
+    <!-- Waves Effect Css -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/node-waves/waves.css') }}">
+
+    <!-- Custom Css -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+</head>
+
+<body class="five-zero-zero">
+    <div class="five-zero-zero-container">
+        <div class="error-code">500</div>
+        <div class="error-message">Internal Server Error</div>
+        <div class="button-place">
+            <a href="#" class="btn btn-default btn-lg waves-effect" onclick="window.history.go(-1)">GO BACK</a>
+        </div>
+    </div>
+
+    <!-- Jquery Core Js -->
+    <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
+    <!-- Bootstrap Core Js -->
+   <script src="{{ url_for('static',filename='plugins/bootstrap/js/bootstrap.js') }}"></script>
+    <!-- Waves Effect Plugin Js -->
+    <script src="{{ url_for('static',filename='plugins/node-waves/waves.js') }}"></script>
+</body>
+
+</html>
