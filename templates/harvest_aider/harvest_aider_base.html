@@ -106,8 +106,8 @@
                             <span>Allocate Stalk Collector</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#">
+                    <li id="job_schedule">
+                        <a href={{ url_for('show_job_schedule') }}>
                             <i class="material-icons">list</i>
                             <span>Complete Job Schedule</span>
                         </a>
@@ -185,17 +185,17 @@
                     <h4 class="modal-title">Request Collection of Stalk Bales</h4>
                 </div>
                 <div class="modal-body">
-                    <form method="POST">
+                    <form method="POST" action={{ url_for('collection_request') }}>
                         <label for="stalk_no">Bales of Stalk</label>
                         <div class="form-group">
                             <div class="form-line">
-                                <input type="text" id="stalk_no" name="stalk_no" class="form-control" placeholder="Enter the number of bales">
+                                <input type="text" id="stalk_no" name="bales" class="form-control" placeholder="Enter the number of bales">
                             </div>
                         </div>
                         <label for="collection_date">Date of Collection</label>
                         <div class="form-group">
                             <div class="form-line">
-                                <input type="date" id="collection_date" name="collection_date" class="form-control">
+                                <input type="date" id="collection_date" name="date" class="form-control">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
