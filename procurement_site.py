@@ -6,7 +6,7 @@ import schedule
 import time
 
 import flask
-from flask import send_from_directory
+from flask import send_from_directory, flash
 from flask import Flask, render_template, url_for, redirect, request, session, g
 from flask_migrate import Migrate
 
@@ -82,12 +82,13 @@ def login():
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
+                flash('You were successfully logged in')
                 return redirect(url_for('farmer_list'))
         
         #Checking if the user is a stalk collector
         elif user_type == 'S':
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            if request.form['password'] == 'pass':
                 session['user'] = user
                 session['username'] = db_pass.collector_name
 
@@ -96,30 +97,27 @@ def login():
         #Checking if the user is a gram panchyat member
         elif user_type == 'G':
             db_pass = Gram_Panchayat.query.filter_by(username=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            if request.form['password'] == 'password123':
                 session['user'] = user
                 session['username'] = user
-
+                flash('You were successfully logged in')
             return redirect(url_for('request_generator'))
     
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-<<<<<<< Updated upstream
             # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
+            print(db_pass.name)
             if request.form['password'] == 'pass':
-=======
-            # if check_password_hash(db_pass.password_hash,request.form['password']):
-            if request.form['password']=='pass':
->>>>>>> Stashed changes
                 session['user'] = user
-                # session['username'] = db_pass.name
+                session['username'] = db_pass.name
+                flash('You were successfully logged in')
                 return redirect(url_for('harvest_aider'))
 
         #Checking if the user is a factory manager
         elif user_type == 'M':
             db_pass = Factory_Manager.query.filter_by(username=user).first()
-            # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
+            # if check_password_hash(db_pass.password_hash,request.form['password']):
             if request.form['password'] == 'pass':
                 session['user'] = user
                 # session['username'] = db_pass.name
@@ -270,10 +268,12 @@ def allocate_collector():
 @app.route('/harvest_aider/collection_request', methods=['GET', 'POST'])
 def collection_request():
     if g.user and g.user[4] == 'A':
-        gp = Gram_Panchayat.query.filter_by(username=session['user']).first()
+        ha = Harvest_Aider.query.filter_by(aider_id=session['user']).first()
+        print(session['user'])
+        print(ha.aider_id)
         date = request.form['date']
         bales = request.form['bales']
-        new_req = Factory_Stalk_Collection(date, bales, gp.village_name, gp.district_name, gp.state)
+        new_req = Factory_Stalk_Collection(date, bales, ha.district, ha.district, ha.state)
         db.session.add(new_req)
         db.session.commit()
         return redirect('/harvest_aider/add_collector')
@@ -284,7 +284,7 @@ def collection_request():
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
 def request_generator():
     if g.user and g.user[4] == 'G':
-        gp = Gram_Panchayat.query.filter_by(userame=session['user']).first()
+        gp = Gram_Panchayat.query.filter_by(username=session['user']).first()
         farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
         if flask.request.method == 'POST':
             returned_values = request.form.getlist('request')
@@ -292,7 +292,7 @@ def request_generator():
                 val = Farmer.query.filter_by(farmer_id=i).all()
                 for v in val:
                     v.request_harvest = 1
-                    j_id = v.state+v.farmer_id
+                    j_id = gen_new_id(v.state, 13, 'J')
                     exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
                     job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, v.farm_size, 0, exp_dur)
                     db.session.add(job)
@@ -314,7 +314,9 @@ def joblist():
                     l.bales_collected = b
                     l.fees = (l.farm_size*400)
                     db.session.commit()
-        jl=Job_List.query.filter_by(collector_id=session['user'], date_job = now.strftime('%y/%m/%d')).all()
+        print(now.strftime('%Y/%m/%d'))
+        jl=Job_List.query.filter_by(collector_id=session['user'], date_job=str(now.strftime('%Y-%m-%d'))).all()
+        print(jl[0].collector_id)
         if len(jl) != 0:
             return render_template('/stalk_collector/index.html', data=jl)
         return render_template('/stalk_collector/index.html', data=0)
@@ -381,7 +383,6 @@ def contact():
     else:
         return render_template('404.html')
         
-<<<<<<< Updated upstream
 @app.route('/factory_manager/')
 def factory_manager():
     if g.user and g.user[4] == 'M':
@@ -405,8 +406,6 @@ def todays_report():
         return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
     else:
         return render_template('404.html')
-=======
->>>>>>> Stashed changes
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True,host="0.0.0.0", port=5000)

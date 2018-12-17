@@ -223,26 +223,6 @@ class Harvest_Aider(db.Model):
         self.state = state
         self.no_villages = no_villages
 
-class Factory_Stalk_Collection(db.Model):
-
-    __tablename__ = 'factory_stalk_collection'
-
-    request_id = db.Column(db.Integer, primary_key=True)
-    requestor_id = db.Column(db.String(20), db.ForeignKey('harvest_aider.aider_id'))
-    district_name = db.Column(db.String(20))
-    date_request = db.Column(db.Date)
-    date_fulfilment = db.Column(db.Date)
-    bales_stalk = db.Column(db.Integer)
-    no_trucks = db.Column(db.Integer)
-    amt_received = db.Column(db.Integer, server_default='0')
-    requestor = db.relationship(Harvest_Aider, backref='factory_stalk_collection', uselist=False, foreign_keys=requestor_id)
-
-    def __init__(self, request_id, date_request, bales_stalk, no_trucks):
-        self.request_id = request_id
-        self.date_request = date_request
-        self.bales_stalk = bales_stalk
-        self.no_trucks = no_trucks
-
 class Job_List(db.Model):
     
     __tablename__='job_list'
@@ -253,7 +233,7 @@ class Job_List(db.Model):
     collector_id = db.Column(db.String(20), db.ForeignKey('stalk_collector.collector_id'))
     equip_id = db.Column(db.String(20), db.ForeignKey('harvest_equipment.equip_id'))
     farmer_id = db.Column(db.String(20), db.ForeignKey('farmer.farmer_id'))
-    request_id = db.Column(db.Integer, db.ForeignKey('request_harvest.request_id'))
+    requestor_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
     location = db.Column(db.String(250))
     farm_size= db.Column(db.Integer)
     fees = db.Column(db.Integer)
@@ -264,7 +244,7 @@ class Job_List(db.Model):
     collector = db.relationship(Stalk_Collector, backref='job_list', uselist=False, foreign_keys=collector_id)
     equip = db.relationship(Harvest_Equipment, backref='job_list', uselist=False, foreign_keys=equip_id)
     farmer = db.relationship(Farmer, backref='job_list', uselist=False, foreign_keys=farmer_id)
-    request = db.relationship(Request_Harvest, backref='job_list', uselist=False, foreign_keys=request_id)
+    request = db.relationship(Gram_Panchayat, backref='job_list', uselist=False, foreign_keys=requestor_id)
 
     def __init__(self, job_no, farmer_id, request_id, location, farm_size, fees, expected_duration):
         self.job_no = job_no
