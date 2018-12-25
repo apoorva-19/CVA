@@ -1,67 +1,90 @@
 {%extends "/stalk_collector/stalk_collector_base.html"%}
 {%block content%}
-    {%if data == 0:%}
-    <div class="row-clearfix">
-        <div class="card">
-            <div class="header">    
-                <h2>NO JOBS FOR TODAY</h2>
-            </div>    
+{%if data == 0:%}
+<div class="row-clearfix">
+    <div class="card">
+        <div class="header">
+            <h2>NO JOBS FOR TODAY</h2>
         </div>
     </div>
-        
-    {%endif%}    
-    {%if data != 0:%}
-        {% for j in data: %} 
-            {%if j.job_complete == 0%}
-                <div class="row clearfix">    
-                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                        <div class="card">
-                            <div class="header">
-                                <h2>
-                                    JOB {{ j.job_no }}
-                                </h2>
-                            </div>
-                            <div class="body">
-                                Farmer id: {{ j.farmer_id }}
-                                <br>
-                                Farm Size: {{ j.farm_size }}
-                                <br>
-                                Date of job: {{ j.date_job }}
-                                <br>
-                                Time: {{ j.time }} 
-                                <br>
-                                Time Reqd: {{'%0.1f' % j.expected_duration }} hrs
-                                {% if j.bales_collected == 0%}
-                                <form method="POST" action= {{ url_for('joblist') }} class="form-horizontal">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <div class="form-line">
-                                                <input type="text" class="form-control" placeholder="Bales Collected" name = "bales">
-                                            </div>
-                                        </div>
-                                    </div>   
-                                    <br>
-                                    <input type="hidden" id = {{ j.job_no }} value= {{ j.job_no }} name = "j_no">
-                                    <br>
-                                    <button type="submit" class="btn btn-success waves-effect">Amount to pay</button>
-                                </form>
+</div>
 
-                                {%endif%}
-                                {%if j.bales_collected != 0%}   
-                                    <br>
-                                    Bales collected: {{ j.bales_collected }}
-                                    <br>
-                                    Fees to collect: {{ j.fees }}
-                                    <form method="POST" action= {{ url_for('job_comp') }} class="form-horizontal">
-                                        <input type="hidden" , value = {{ j.job_no }} name = "j">
-                                        <br>
-                                        <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
-                                    </form>
-                                {%endif%}
-                            </div>          
-                        </div>
-                    </div>
-            {%endif%}  
-        {%endfor%}
-    {%endif%}    
-{%endblock%}
+{%endif%}
+{%if data != 0:%}
+{% for j in data: %}
+{%if j.job_complete == 0%}
+<div class="row clearfix">
+    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    JOB NUMBER: {{ j.job_no }}
+                </h2>
+            </div>
+            <div class="body">
+                <table class="table">
+                    <tr>
+                        <th>Farmer Id</th>
+                        <td>{{ j.farmer_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Farm Size</th>
+                        <td>{{ j.farm_size }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date of job</th>
+                        <td>{{ j.date_job }}</td>
+                    </tr>
+                    <tr>
+                        <th>Time</th>
+                        <td>{{ j.time }} </td>
+                    </tr>
+                    <tr>
+                        <th>Time Required</th>
+                        <td>{{'%0.1f' % j.expected_duration }} hrs</td>
+                    </tr>
+                    <tr>
+                        {% if j.bales_collected == 0%}
+                        <th>Bales to collect</th>
+                        <td>
+                            <form method="POST" action={{ url_for('joblist') }} class="form-horizontal">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="form-line">
+                                            <input type="text" class="form-control " placeholder="Bales" name="bales">
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id={{ j.job_no }} value={{ j.job_no }} name="j_no">
+                                <button type="submit" class="btn btn-primary waves-effect">Calculate amount to pay</button>
+                            </form>
+                        </td>
+                        {%endif%}
+                    </tr>
+                    {%if j.bales_collected != 0%}
+                    <tr>
+                        <th>Bales collected</th>
+                        <td>{{ j.bales_collected }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount to pay</th>
+                        <td>{{ j.fees }}</td>
+                    </tr>
+                </table>
+                <form method="POST" action={{ url_for('job_comp') }} class="form-horizontal">
+                    <input type="hidden" , value={{ j.job_no }} name="j">
+                    <br>
+                    <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
+                </form>
+                {%endif%}
+            </div>
+        </div>
+    </div>
+    {%endif%}
+    {%endfor%}
+    {%endif%}
+    <script type="text/javascript">
+        var collection = document.getElementById("home");
+        collection.classList.add("active")
+    </script>
+    {%endblock%}
