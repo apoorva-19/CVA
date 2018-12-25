@@ -19,8 +19,9 @@ from state_district import code, state
 
 Migrate(app, db)
 now = datetime.datetime.now()
+yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
 start_time = datetime.timedelta(hours=9)
-# to generate hashed passwords for inserting into the database
+amt_per_bales = 1.75
 
 #setting the hours completed to zero to allocate collectors and harvestors for the next day
 def set_completed_hours():
@@ -31,6 +32,13 @@ def set_completed_hours():
         collector.hours_completed_today = 0
     for equip in list_equipment:
         equip.hours_completed_today = 0
+    db.session.commit()
+
+#moving the unfinised jobs ahead to the next day
+def update_unfinished_jobs():
+    jl=Job_List.query.filter_by(date_job=str(yesterday.strftime('%Y-%m-%d')), job_complete=0).all()
+    for job in jl:
+        job.date_job = str(now.strftime('%Y-%m-%d'))
     db.session.commit()
 
 #generate new id
@@ -80,7 +88,7 @@ def login():
         #Checking if the user is a patwari
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            if request.form['password'] == 'pass':
                 session['user'] = user
                 flash('You were successfully logged in')
                 return redirect(url_for('farmer_list'))
@@ -90,7 +98,7 @@ def login():
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
             if request.form['password'] == 'pass':
                 session['user'] = user
-                session['username'] = db_pass.collector_name
+                # session['username'] = db_pass.collector_name
 
                 return redirect(url_for('joblist'))            
 
@@ -107,10 +115,9 @@ def login():
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
             # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
-            print(db_pass.name)
             if request.form['password'] == 'pass':
                 session['user'] = user
-                session['username'] = db_pass.name
+                # session['username'] = db_pass.name
                 flash('You were successfully logged in')
                 return redirect(url_for('harvest_aider'))
 
@@ -138,6 +145,11 @@ def before_request():
     g.user = None
     if 'user' in session:
         g.user = session['user']
+
+#returns the district code 
+def get_district_id(state, district):
+    district_list = code.get(state)
+    return (district_list.index(district)+1)
 
 #Landing page for the patwari
 @app.route('/patwari/')
@@ -236,8 +248,7 @@ def gen_user_id():
     else:
         return render_template('404.html')
 
-#Allocating collectors and equipments to the farmers
-#########################################################Add the time parameter
+#Allocating collectors and equipments to the farmers7
 @app.route('/harvest_aider/allocate/')
 def allocate_collector():
     if g.user and g.user[4] == 'A':
@@ -265,6 +276,7 @@ def allocate_collector():
     else:
         return render_template('404.html')
 
+#Requesting the collection of stalk by the bioethanol production company
 @app.route('/harvest_aider/collection_request', methods=['GET', 'POST'])
 def collection_request():
     if g.user and g.user[4] == 'A':
@@ -292,9 +304,19 @@ def request_generator():
                 val = Farmer.query.filter_by(farmer_id=i).all()
                 for v in val:
                     v.request_harvest = 1
-                    j_id = gen_new_id(v.state, 13, 'J')
+                    #generating the job id
+                    j_id = gen_new_id(v.state, get_district_id(v.state, v.district), 'J')
+                    #calculating the job's expected duration
                     exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
-                    job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, v.farm_size, 0, exp_dur)
+                    farm_size = v.farm_size
+                    #if duration is more than the 10
+                    if exp_dur > 10:
+                        job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, 12, 0, 10)
+                        exp_dur -= 10
+                        farm_size -= 12
+                        j_id = gen_new_id(v.state, get_district_id(v.state, v.district), 'J')
+
+                    job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, farm_size, 0, exp_dur)
                     db.session.add(job)
                     db.session.commit()
         farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
@@ -312,11 +334,15 @@ def joblist():
                 jlist = Job_List.query.filter_by(job_no=j).all()
                 for l in jlist:
                     l.bales_collected = b
-                    l.fees = (l.farm_size*400)
+                    l.fees = int(b)*20*amt_per_bales
                     db.session.commit()
-        print(now.strftime('%Y/%m/%d'))
+        # print(now.strftime('%Y/%m/%d'))
         jl=Job_List.query.filter_by(collector_id=session['user'], date_job=str(now.strftime('%Y-%m-%d'))).all()
-        print(jl[0].collector_id)
+        # print(jl[0].collector_id)
+        for job in jl:
+            job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
+            job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")
+
         if len(jl) != 0:
             return render_template('/stalk_collector/index.html', data=jl)
         return render_template('/stalk_collector/index.html', data=0)
@@ -329,6 +355,9 @@ def date_schedule():
         if flask.request.method == 'POST':
             date = request.form['date']
             datewise=Job_List.query.filter_by(collector_id=session['user'], date_job = date).all()
+            for job in datewise:
+                job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
+            job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")
             return render_template('/stalk_collector/datewise.html', data=datewise) 
         return render_template('/stalk_collector/datewise.html')
     else:
