@@ -4,11 +4,13 @@ import datetime
 from datetime import timedelta
 import schedule
 import time
+import requests
 
 import flask
 from flask import send_from_directory, flash
 from flask import Flask, render_template, url_for, redirect, request, session, g
 from flask_migrate import Migrate
+from send_sms import url, headers, payload
 
 from werkzeug.security import check_password_hash, generate_password_hash
 import models
@@ -23,6 +25,19 @@ yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
 start_time = datetime.timedelta(hours=9)
 amt_per_bales = 1.75
 
+#send messages
+def send_sms(msg, numbers):
+    if len(numbers) > 1:
+        number = ""
+        for num in numbers
+            number += num 
+            number += ','
+    elif len(numbers) == 1:
+        number = str(numbers)
+
+    response = requests.request("POST", url, data=payload.format(msg,number), headers=headers)
+
+    
 #setting the hours completed to zero to allocate collectors and harvestors for the next day
 def set_completed_hours():
     list_collector = Stalk_Collector.query.all()
