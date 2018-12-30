@@ -12,7 +12,9 @@
 
 import os
 from flask import Flask
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from werkzeug.security import generate_password_hash
 
@@ -20,8 +22,13 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'mysecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://Smoke:Smoke_cva123@localhost/cva'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'ethanowell.cva@gmail.com'
+app.config['MAIL_PASSWORD'] = 'jfcouhooblgqvqsy'
 
 db = SQLAlchemy(app)
 
@@ -35,15 +42,29 @@ class Patwari(db.Model):
     district_name = db.Column(db.String(20))
     state = db.Column(db.String(2))
     contact_no = db.Column(db.String(10), unique=True, index=True)
+    email_id = db.Column(db.String(64), unique=True, index=True)
 
-    def __init__(self, patwari_id, password, patwari_name, district_name, state, contact_no):
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.patwari_id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Patwari.query.get(user_id)
+
+    def __init__(self, patwari_id, password, patwari_name, district_name, state, contact_no, email_id):
         self.patwari_id = patwari_id
         self.password_hash = generate_password_hash(password)
         self.patwari_name = patwari_name
         self.district_name = district_name
         self.state = state
         self.contact_no = contact_no
-
+        self.email_id = email_id
 class Farmer(db.Model):
 
     __tablename__ = 'farmer'
@@ -69,7 +90,7 @@ class Farmer(db.Model):
         self.state = state
 
     def __repr__(self):
-        print ("Farmer id {1}, Farmer name {2}").format(self.farmer_id,self.farmer_name)
+        print("Farmer id {1}, Farmer name {2}").format(self.farmer_id, self.farmer_name)
 
 class Harvest_Equipment(db.Model):
 
@@ -114,14 +135,29 @@ class Stalk_Collector(db.Model):
     state = db.Column(db.String(2))
     hours_of_work = db.Column(db.Integer, server_default='0')
     hours_completed_today = db.Column(db.Integer, server_default='0')
-    
-    def __init__(self, collector_id, password, collector_name, district_name, state,contact_no,):
+    email_id = db.Column(db.String(64), unique=True, index=True)
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.collector_id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Stalk_Collector.query.get(user_id)
+    def __init__(self, collector_id, password, collector_name, district_name, state,contact_no,email_id):
         self.collector_id = collector_id
         self.password_hash = generate_password_hash(password)
         self.collector_name = collector_name
         self.contact_no = contact_no
         self.district_name = district_name
         self.state = state
+        self.email_id = email_id
+
 
 class Gram_Panchayat(db.Model):
 
@@ -135,6 +171,19 @@ class Gram_Panchayat(db.Model):
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.username}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Gram_Panchayat.query.get(user_id)
 
     def __init__(self, username, password, name, contact_no, email_id, village_name, district_name, state):
         self.username = username
@@ -214,8 +263,22 @@ class Harvest_Aider(db.Model):
     district = db.Column(db.String(20))
     state = db.Column(db.String(2))
     no_villages = db.Column(db.Integer)
+    email_id = db.Column(db.String(64), unique=True, index=True)
 
-    def __init__(self, aider_id, password, name, contact_no, district, state, no_villages):
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.aider_id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Harvest_Aider.query.get(user_id)
+
+    def __init__(self, aider_id, password, name, contact_no, district, state, no_villages, email_id):
         self.aider_id = aider_id
         self.password_hash = generate_password_hash(password)
         self.name = name
@@ -223,6 +286,7 @@ class Harvest_Aider(db.Model):
         self.district = district
         self.state = state
         self.no_villages = no_villages
+        self.email_id = email_id
 
 
 class Job_List(db.Model):
@@ -284,6 +348,19 @@ class Factory_Manager(db.Model):
     email_id = db.Column(db.String(64), unique=True, index=True)
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.username}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Factory_Manager.query.get(user_id)
 
     def __init__(self, username, password, name, contact_no, email_id, district_name, state):
         self.username = username
