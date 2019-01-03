@@ -5,6 +5,7 @@ from datetime import timedelta
 import schedule
 import time
 import requests
+# from flask_mail import Mail
 
 import flask
 from flask import send_from_directory, flash
@@ -14,6 +15,8 @@ from fpdf import FPDF
 from flask_weasyprint import HTML, render_pdf
 from send_sms import url, headers, payload
 
+from flask_mail import Mail, Message
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import models
 from models import app, db
@@ -21,6 +24,7 @@ from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment
 
 from state_district import code, state
 
+mail = Mail(app)
 Migrate(app, db)
 now = datetime.datetime.now()
 yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
@@ -113,10 +117,11 @@ def login():
         #Checking if the user is a stalk collector
         elif user_type == 'S':
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
-            if request.form['password'] == 'pass':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 # session['username'] = db_pass.collector_name
 
+                session['username'] = db_pass.collector_name
                 return redirect(url_for('joblist'))            
 
         #Checking if the user is a gram panchyat member
@@ -148,6 +153,86 @@ def login():
                 return redirect(url_for('factory_manager'))        
         
     return render_template('login.html')
+
+def send_reset_email(uname, db_pass):
+    token = db_pass.get_reset_token()
+    print("token: ",token)
+    print("uname: ",uname)
+    session['token'] = token
+    session['uname'] = uname
+    msg = Message('Password Reset Request',
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[db_pass.email_id])
+    msg.html = render_template("email_format.html", uname=uname, token=token)                   
+    mail.send(msg)
+    
+@app.route('/forgot_passwd', methods=['GET', 'POST'])
+def reset_request():
+    if request.method == 'GET':
+        return render_template('forgot_passwd.html')
+
+    uname = request.form['username']
+    
+    #if the user is a patwari
+    if uname[4] == 'P':
+        db_pass = Patwari.query.filter_by(patwari_id=uname).first()
+            
+    #if the user is a stalk collector
+    elif uname[4] == 'S':
+        db_pass = Stalk_Collector.query.filter_by(collector_id=uname).first()
+
+    #if the user is a gram panchyat member
+    elif uname[4] == 'G':
+        db_pass = Gram_Panchayat.query.filter_by(username=uname).first()
+
+    #if the user is a harvest aider
+    elif uname[4] == 'A':
+        db_pass = Harvest_Aider.query.filter_by(aider_id=uname).first()
+
+    #if the user is a factory manager
+    elif uname[4] == 'M':
+        db_pass = Factory_Manager.query.filter_by(username=uname).first()
+
+    if db_pass is None:
+        return render_template('forgot_passwd.html')
+    send_reset_email(uname, db_pass)
+    print("db_pass:", db_pass)
+    return render_template('login.html')
+
+@app.route('/forgot_passwd/reset', methods=['GET','POST'])
+def reset_token():
+    uname = session.get('uname', None)
+    token = session.get('token', None)
+    if request.method == "POST":
+    #if the user is a patwari
+        if uname[4] == 'P':
+            user = Patwari.verify_reset_token(token)
+                
+        #if the user is a stalk collector
+        elif uname[4] == 'S':
+            user = Stalk_Collector.verify_reset_token(token)
+
+        #if the user is a gram panchyat member
+        elif uname[4] == 'G':
+            user = Gram_Panchayat.verify_reset_token(token)
+
+        #if the user is a harvest aider
+        elif uname[4] == 'A':
+            user = Harvest_Aider.verify_reset_token(token)
+
+        #if the user is a factory manager
+        elif uname[4] == 'M':
+            user = Factory_Manager.verify_reset_token(token)
+        print(user)    
+        if user is None:
+            return redirect(url_for('reset_request'))
+        hashed_password =  generate_password_hash(request.form['password'])
+        print(request.form['password'])
+        print(hashed_password)
+        user.password_hash = hashed_password
+        db.session.commit()
+        return render_template('login.html')
+    return render_template('reset_password.html')
 
 @app.route('/logout/')
 def logout():
@@ -478,6 +563,5 @@ def todays_report():
         return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
     else:
         return render_template('404.html')
-
 if __name__ == '__main__':
     app.run(debug=True,host="0.0.0.0", port=5000)
