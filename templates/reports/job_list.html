@@ -1,0 +1,65 @@
+{% extends "/reports/reports_base.html" %}
+<style>
+    .status{
+        color: red;
+    }
+</style>
+{% block content %}
+<div class="row clearfix">
+    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    JOBS SCHEDULED
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>JOB NO</th>
+                            <th>DATE</th>
+                            <th>TIME</th>
+                            <th>COLLECTOR NAME</th>
+                            <th>FARMER NAME</th>
+                            <th>FEES</th>
+                            <th>STATUS</th>
+                            <th>BALES OF STALK</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if joblist.count() > 0: %}
+                        {% for job in joblist %}
+                        <tr>
+                            <th scope="row">{{ job.job_no }}</th>
+                            <td>{{ job.date_job }}</td>
+                            <td>{{ job.time }}</td>
+                            <td>{{ job.collector_id }}</td>
+                            <td>{{ job.farmer_id }}</td>
+                            <td>{{ job.fees }}</td>
+                            {% if job.job_complete == 0: %}
+                            <td class="status">Incomplete</td>
+                            {% else: %}
+                            <td>Completed</td>
+                            {% endif %}
+                            <td>{{ job.bales_collected }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else: %}
+                        <tr>
+                            <th></th>
+                            <td></td>
+                            <td></td>
+                            <td>No records to display</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

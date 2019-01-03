@@ -8,8 +8,10 @@ import requests
 
 import flask
 from flask import send_from_directory, flash
-from flask import Flask, render_template, url_for, redirect, request, session, g
+from flask import Flask, render_template, url_for, redirect, request, session, g, make_response
 from flask_migrate import Migrate
+from fpdf import FPDF
+from flask_weasyprint import HTML, render_pdf
 from send_sms import url, headers, payload
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -29,7 +31,7 @@ amt_per_bales = 1.75
 def send_sms(msg, numbers):
     if len(numbers) > 1:
         number = ""
-        for num in numbers
+        for num in numbers:
             number += num 
             number += ','
     elif len(numbers) == 1:
@@ -252,8 +254,12 @@ def city(state):
 
 @app.route('/harvest_aider/job_schedule/')    
 def show_job_schedule():
-    jobs = Job_List.query.filter((Job_List.collector_id != 'Not assigned') | (Job_List.job_complete == 0))
-    return render_template('/harvest_aider/job_schedule.html', joblist=jobs)
+    if g.user and g.user[4] == 'A':
+        jobs = Job_List.query.filter((Job_List.collector_id != 'Not assigned') | (Job_List.job_complete == 0))
+        return render_template('/harvest_aider/job_schedule.html', joblist=jobs)
+
+    else:
+        return render_template('404.html')
 
 @app.route('/harvest_aider/gen_user_id/')
 def gen_user_id():
@@ -263,7 +269,7 @@ def gen_user_id():
     else:
         return render_template('404.html')
 
-#Allocating collectors and equipments to the farmers7
+#Allocating collectors and equipments to the farmers
 @app.route('/harvest_aider/allocate/')
 def allocate_collector():
     if g.user and g.user[4] == 'A':
@@ -306,6 +312,28 @@ def collection_request():
         return redirect('/harvest_aider/add_collector')
     else:
         return render_template('404.html')    
+
+#Generate reports
+@app.route('/harvest_aider/reports/job_list<date>.pdf/')
+# def job_list_report(date):
+#     if g.user and g.user[4] == 'A':
+#         jobs = Job_List.query.filter((Job_List.collector_id != 'Not assigned') | (Job_List.job_complete == 0))
+#         html = render_template('/reports/job_list.html', joblist=jobs)
+#         return render_pdf(HTML(string=html))
+
+#     else:
+#         return render_template('404.html')
+
+def pdf_report(date):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font('Arial', 'B', 16)
+    pdf.cell(40, 10, 'Hello World!')
+    # return pdf.output('tuto1.pdf', 'F')
+    response = make_response(pdf.output(dest='S').encode('latin-1'))
+    response.headers.set('Content-Disposition', 'attachment', filename='report'+date+ '.pdf')
+    response.headers.set('Content-Type', 'application/pdf')
+    return response
 
 # Request for harvesting by people employed in the Gram Panchanyat
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])

@@ -14,6 +14,7 @@ Flask-OAuth==0.12
 Flask-OAuthlib==0.9.4
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
+fpdf==1.7.2
 httplib2==0.11.3
 idna==2.6
 isort==4.3.4
@@ -40,7 +41,7 @@ six==1.11.0
 SQLAlchemy==1.2.6
 SQLAlchemy-Utils==0.33.2
 typed-ast==1.1.0
-urllib3==1.22
+urllib3==1.23
 URLObject==2.4.3
 Werkzeug==0.14.1
 wincertstore==0.2
