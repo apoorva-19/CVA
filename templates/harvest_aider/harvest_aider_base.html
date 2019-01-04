@@ -154,9 +154,34 @@
     </section>
 
     <section class="content">
-            {% block content %}
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {% if category == "error" %}
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                    {% if category=="warning" %}
+                    <div class="alert bg-yellow alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                    {% if category=="success" %}
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-            {% endblock %}
+        {% block content %}
+
+        {% endblock %}
         </div>
     </section>
 
