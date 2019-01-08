@@ -94,10 +94,10 @@
                             <span>Home</span>
                         </a>
                     </li>
-                    <li id="request_harvest">
+                    <li id="request_list">
                         <a href={{ url_for('gen_user_id') }}>
                             <i class="material-icons">format_list_numbered</i>
-                            <span>List of Requests</span>
+                            <span>Request List</span>
                         </a>
                     </li>
                     <li id="allocate_collector">
@@ -118,12 +118,6 @@
                             <span>Add New Stalk Collector</span>
                         </a>
                     </li>
-                    <li id="equip_maintenance">
-                        <a href="{{ url_for('maintenance') }}">
-                            <i class="material-icons">build</i>
-                            <span>Maintenance of Equipment</span>
-                        </a>
-                    </li>
                     <li id="request_truck">
                         <a data-toggle="modal" data-target="#requesting_truck">
                             <i class="material-icons">local_shipping</i>
@@ -133,11 +127,32 @@
                     <li id="report_gen_harvest">
                         <a data-toggle="modal" data-target="#">
                             <i class="material-icons">book</i>
-                            <span>Generate Report</span>
+                            <span>Generate Report <br></span>
+                            <br>
                         </a>
+                    </li>
+
+                   <li id="equip_maintenance">
+                        <a href="#" class="menu-toggle">
+                            <i class="material-icons">build</i>
+                            <span>Maintenance of Equipment</span>
+                        </a>
+                            <ul class="ml-menu">
+                                <li id="put">
+                                    <a href={{ url_for('insert') }}>
+                                        <span>Insert Equipment</span>
+                                    </a>
+                                </li>
+                                <li id="remove">
+                                    <a href={{ url_for('retrieve') }}>
+                                        <span>Retrieve Equipment</span>
+                                    </a>
+                                </li>
+                            </ul>
                     </li>
                 </ul>
             </div>
+
             <!-- #Menu -->
             <!-- Footer -->
             <div class="legal">
@@ -154,9 +169,9 @@
     </section>
 
     <section class="content">
-            {% with messages = get_flashed_messages() %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for message in messages %}
+                {% for category,message in messages %}
                     {% if category == "error" %}
                     <div class="alert bg-red alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -260,3 +275,90 @@
 </body>
 
 </html>
+
+<!--
+                    <li id="equip_maintenance">
+                        <a href="#" class="menu-toggle">
+                            <i class="material-icons">build</i>
+                            <span>8. Maintenance of Equipment</span>
+                        </a>
+                            <ul class="ml-menu">
+                                <li id="put">
+                                    <a href={{ url_for('insert') }}>
+                                        <span>Insert Equipment</span>
+                                    </a>
+                                </li>
+                                <li id="remove">
+                                    <a href={{ url_for('retrieve') }}>
+                                        <span>Retrieve Equipment</span>
+                                    </a>
+                                </li>
+                            </ul>
+                    </li>
+
+            <div class="menu">
+                <ul class="list">
+                    <li id="header" class="header">
+                        MAIN NAVIGATION
+                    </li>
+                    <li id="home">
+                        <a href={{ url_for('harvest_aider') }}>
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li id="request_harvest">
+                        <a href={{ url_for('gen_user_id') }}>
+                            <i class="material-icons">format_list_numbered</i>
+                            <span>List of Requests</span>
+                        </a>
+                    </li>
+                    <li id="allocate_collector">
+                        <a data-toggle="modal" data-target="#allocate">
+                            <i class="material-icons">touch_app</i>
+                            <span>Allocate Stalk Collector</span>
+                        </a>
+                    </li>
+                    <li id="job_schedule">
+                        <a href={{ url_for('show_job_schedule') }}>
+                            <i class="material-icons">list</i>
+                            <span>Complete Job Schedule</span>
+                        </a>
+                    </li>
+                    <li id="add_collector">
+                        <a href={{ url_for('add_collector') }}>
+                            <i class="material-icons">person_add</i>
+                            <span>Add New Stalk Collector</span>
+                        </a>
+                    </li>
+                    <li id="request_truck">
+                        <a data-toggle="modal" data-target="#requesting_truck">
+                            <i class="material-icons">local_shipping</i>
+                            <span>Request Stalk Collection</span>
+                        </a>
+                    </li>
+                    <li id="report_gen_harvest">
+                        <a data-toggle="modal" data-target="#">
+                            <i class="material-icons">book</i>
+                            <span>Generate Report <br></span>
+                            <br>
+                        </a>
+                    </li>
+                    <li id="request_truck">
+                        <a data-toggle="modal" data-target="#requesting_truck">
+                            <i class="material-icons">local_shipping</i>
+                            <span>6. Request Stalk Collection</span>
+                        </a>
+                    </li>
+                    <li id="report_gen_harvest">
+                        <a data-toggle="modal" data-target="#">
+                            <i class="material-icons">book</i>
+                            <span>7. Generate Report <br></span>
+                            <br>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+
+-->

@@ -42,7 +42,7 @@ class Patwari(db.Model):
     district_name = db.Column(db.String(20))
     state = db.Column(db.String(2))
     contact_no = db.Column(db.String(10), unique=True, index=True)
-    email_id = db.Column(db.String(64), unique=True, index=True)
+    email_id = db.Column(db.String(256), unique=True, index=True)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -108,6 +108,8 @@ class Harvest_Equipment(db.Model):
     servicing_comp = db.Column(db.String(25))
     contact_person = db.Column(db.String(40))
     contact_number = db.Column(db.String(10))
+    # email_id = db.Column(db.String(256), unique=True, index=True)
+    hours_completed_today = db.Column(db.Integer, server_default='0')
 
     def __init__(self, available, equip_id, name_equip, type_equip, manufac_cmp, year_of_purchase, last_servicing, next_servicing, servicing_comp, contact_person, contact_number, hours_completed_today):
         self.equip_id = equip_id
@@ -136,10 +138,8 @@ class Stalk_Collector(db.Model):
     employed_date = db.Column(db.Date)
     hours_of_work = db.Column(db.Integer, server_default='0')
     hours_completed_today = db.Column(db.Integer, server_default='0')
-    email_id = db.Column(db.String(64), unique=True, index=True)
-    equip_id = db.Column(db.String(20), db.ForeignKey('harvest_equipment.equip_id'))
-    req_equip_id = db.relationship(Harvest_Equipment, backref='stalk_collector', uselist=False, foreign_keys=equip_id)
-    
+    email_id = db.Column(db.String(256), unique=True, index=True)
+
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.collector_id}).decode('utf-8')
@@ -171,7 +171,7 @@ class Gram_Panchayat(db.Model):
     password_hash = db.Column(db.String(128))
     name = db.Column(db.String(30))
     contact_no = db.Column(db.String(10), unique=True, index=True)
-    email_id = db.Column(db.String(64), unique=True, index=True)
+    email_id = db.Column(db.String(256), unique=True, index=True)
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
@@ -268,7 +268,7 @@ class Harvest_Aider(db.Model):
     district = db.Column(db.String(20))
     state = db.Column(db.String(2))
     no_villages = db.Column(db.Integer)
-    email_id = db.Column(db.String(64), unique=True, index=True)
+    email_id = db.Column(db.String(256), unique=True, index=True)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)

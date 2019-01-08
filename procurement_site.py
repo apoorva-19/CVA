@@ -10,6 +10,9 @@ import flask
 from flask import send_from_directory, flash
 from flask import Flask, render_template, url_for, redirect, request, session, g, make_response
 from flask_migrate import Migrate
+from fpdf import FPDF
+from send_sms import url, headers, payload
+
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -39,7 +42,6 @@ def send_sms(msg, numbers):
 
     response = requests.request("POST", url, data=payload.format(msg,number), headers=headers)
 
-    
 #setting the hours completed to zero to allocate collectors and harvestors for the next day
 def set_completed_hours():
     list_collector = Stalk_Collector.query.all()
@@ -125,7 +127,7 @@ def login():
         session.pop('user', None)
         user = request.form['username']
         if len(user) < 5:
-            flash('Incorrect login credentials!', category="error")    
+            flash('Incorrect login credentials!', 'error')   
             return render_template('login.html')
         user_type = user[4]
         #Checking if the user is a patwari
@@ -133,10 +135,11 @@ def login():
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
-                flash('You were successfully logged in')
+                session['username'] = db_pass.patwari_name
+                flash('You were successfully logged in', 'success')
                 return redirect(url_for('farmer_list'))
             else:
-                flash('Incorrect login credentials!', error)    
+                flash('Incorrect login credentials!', 'error')    
         
         #Checking if the user is a stalk collector
         elif user_type == 'S':
@@ -147,7 +150,7 @@ def login():
                 session['username'] = db_pass.collector_name
                 return redirect(url_for('joblist'))  
             else:
-                flash('Incorrect login credentials!', error)    
+                flash('Incorrect login credentials!', 'error')    
               
 
         #Checking if the user is a gram panchyat member
@@ -156,23 +159,22 @@ def login():
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 session['username'] = user
-                flash('You were successfully logged in')
+                flash('You were successfully logged in', 'success')
             else:
-                flash('Incorrect login credentials!', error)    
+                flash('Incorrect login credentials!', 'error')    
 
             return redirect(url_for('request_generator'))
     
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
-                # session['username'] = db_pass.name
-                flash('You were successfully logged in')
+                session['username'] = db_pass.name
+                flash('You were successfully logged in', 'success')
                 return redirect(url_for('harvest_aider'))
             else:
-                flash('Incorrect login credentials!', error)    
+                flash('Incorrect login credentials!', 'error')    
 
         #Checking if the user is a factory manager
         elif user_type == 'M':
@@ -180,13 +182,13 @@ def login():
             if check_password_hash(db_pass.password_hash,request.form['password']):
             # if request.form['password'] == 'pass':
                 session['user'] = user
-                # session['username'] = db_pass.name
+                session['username'] = db_pass.name
                 return redirect(url_for('factory_manager')) 
             else:
-                flash('Incorrect login credentials!', error)    
+                flash('Incorrect login credentials!', 'error')    
 
         else:               
-            flash('Incorrect login credentials!', error)    
+            flash('Incorrect login credentials!', 'error')            
     return render_template('login.html')
 
 def send_reset_email(uname, db_pass):
@@ -205,7 +207,9 @@ def reset_request():
         return render_template('forgot_passwd.html')
 
     uname = request.form['username']
-    
+    if(uname.len() < 4):
+        flash('Incorrect Username!', 'error')
+        return render_template('forgot_passwd.html')
     #if the user is a patwari
     if uname[4] == 'P':
         db_pass = Patwari.query.filter_by(patwari_id=uname).first()
@@ -227,11 +231,11 @@ def reset_request():
         db_pass = Factory_Manager.query.filter_by(username=uname).first()
 
     if db_pass is None:
-        flash('Sorry! your link has expired.', error)
+        flash('Incorrect Username, please try again', 'error')
         return render_template('forgot_passwd.html',)
     send_reset_email(uname, db_pass)
     print("db_pass:", db_pass)
-    flash('Email for password change has been sent', success)
+    flash('Email for password change has been sent', 'success')
     return redirect(url_for('login'))
 
 @app.route('/forgot_passwd/reset/', methods=['GET','POST'])
@@ -260,13 +264,14 @@ def reset_token():
             user = Factory_Manager.verify_reset_token(token)
         print(user)    
         if user is None:
+            flash('Sorry! your reset link has expired, please try again','warning')
             return redirect(url_for('reset_request'))
         hashed_password =  generate_password_hash(request.form['password'])
         print(request.form['password'])
         print(hashed_password)
         user.password_hash = hashed_password
         db.session.commit()
-        flash('Password changed successfully', success)
+        flash('Password changed successfully', 'success')
         return redirect(url_for('login'))
     return render_template('reset_password.html')
 
@@ -329,6 +334,7 @@ def city_farmer(state):
 @app.route('/harvest_aider/')
 def harvest_aider():
     if g.user and g.user[4] == 'A':
+        print(session['username'])
         return render_template('/harvest_aider/index.html')
     else:
         return render_template('404.html')
@@ -346,7 +352,7 @@ def add_collector():
             new_collector = Stalk_Collector(new_id, 'pass', request.form['name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'], request.form['contact_no'])
             db.session.add(new_collector)
             db.session.commit()
-            flash('Stalk Collector information added succesfully!', success)
+            flash('Stalk Collector information added succesfully!', 'success')
         district = code.get('AN')
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
@@ -414,12 +420,12 @@ def allocate_collector():
                     list_collector[i].hours_completed_today += farmer.expected_duration
                     list_eqiup[j].hours_completed_today += farmer.expected_duration
         db.session.commit()
-        flash('Allocation Successful!', success)
+        flash('Allocation Successful!', 'success')
     else:
         return render_template('404.html')
 
 #Requesting the collection of stalk by the bioethanol production company
-@app.route('/harvest_aider/collection_request', methods=['GET', 'POST'])
+@app.route('/harvest_aider/collection_request/', methods=['GET', 'POST'])
 def collection_request():
     if g.user and g.user[4] == 'A':
         ha = Harvest_Aider.query.filter_by(aider_id=session['user']).first()
@@ -544,7 +550,6 @@ def gen_report():
 #         jobs = Job_List.query.filter((Job_List.collector_id != 'Not assigned') | (Job_List.job_complete == 0))
 #         html = render_template('/reports/job_list.html', joblist=jobs)
 #         return render_pdf(HTML(string=html))
-
 #     else:
 #         return render_template('404.html')
 
@@ -604,10 +609,10 @@ def joblist():
                     l.bales_collected = b
                     l.fees = int(b)*20*amt_per_bales
                     db.session.commit()
-                    flash('Update Successful!')
+                    flash('Update Successful!', 'success')
         # print(now.strftime('%Y/%m/%d'))
         jl=Job_List.query.filter_by(collector_id=session['user'], date_job=str(now.strftime('%Y-%m-%d'))).all()
-        # print(jl[0].collector_id)
+        print(jl)
         for job in jl:
             job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
             job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")
@@ -645,46 +650,50 @@ def job_comp():
                 for l in jlist:
                     l.job_complete = 1
                     db.session.commit()
-        flash('Update Successful!')            
+        flash('Update Successful!', success)            
         return redirect('/stalk_collector/joblist')
     else:
         return render_template('404.html') 
+@app.route('/harvest_aider/mainenance/insert', methods=['GET','POST'])
+def insert():
+    from_date = str(now.strftime('%Y-%m-%d'))
+    duration = datetime.timedelta(days=3)
+    to_date = str((datetime.datetime.today() + duration).date())
+    if flask.request.method == "POST":
+        inserted_equipments = request.form.get("inserted")
+        specific_equip = request.form['specific_id']
+        for i in inserted_equipments:
+            equip = Harvest_Equipment.query.filter_by(equip_id=i).first()
+            equip.available = 0
+            equip.last_serivicing = from_date
+        db.session.commit()    
+        # send_mail_for_service()
+    # equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1,
+                                                # Harvest_Equipment.next_servicing >= from_date,
+                                                # Harvest_Equipment.next_servicing <= to_date)
+    equipments = Harvest_Equipment.query.filter_by(equip_id='CH01E000005')
+    print(from_date)
+    print(to_date)
+    print(equipments)
+    return render_template('/harvest_aider/equipment_insert.html', equipments=equipments)
 
-@app.route('/harvest_aider/equipment_maintenance/', methods=['GET', 'POST'])    
-def maintenance():
-    if g.user and g.user[4] == 'A':
-        equipment_names = db.session.query(Harvest_Equipment.name_equip).filter_by(available=0).all()
-        equipment_name_list = {}
-        for name in equipment_names:
-            equipment_name_list[name[0]] = ''
-        return render_template('/harvest_aider/equipment_maintenance.html', equipment_name_list=equipment_name_list)
-    else:
-        return render_template('404.html')
+@app.route('/harvest_aider/maintenance/retieve', methods=['GET', 'POST'])
+def retrieve():
+    if flask.request.method == "POST":
+        retrieved_equipments = request.form.get("retrieved")
+        for r in retrieved_equipments:
+            retr = Harvest_Equipment.query.filter_by(equip_id=r).first()
+            retr.available = 1
+            duration = datetime.timedelta(months=3)
+            to_date = (datetime.datetime.today() + duration).date()
+            retr.next_servicing = to_date
+        db.session.commit()        
+    equipments= Harvest_Equipment.query.filter_by(available=0)    
+    print(equipments)
+    return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments)
 
+# def send_mail_for_service():
 
-@app.route('/harvest_aider/equipment_maintenance/<equip_name>', methods=['GET', 'POST'])
-def equipment_id(equip_name):
-    if g.user and g.user[4] == 'A':
-        equip_ids = db.session.query(Harvest_Equipment.equip_id).filter_by(name_equip=equip_name).all()
-        equip_ids_list = []
-        for equip_id in equip_ids:
-            equip_ids_list.append(equip_id[0])
-        return json.dumps(equip_ids_list)
-    else:
-        return render_template('404.html')
-
-
-@app.route('/harvest_aider/contact_details', methods=['GET', 'POST'])    
-def contact():
-    if g.user and g.user[4] == 'A':
-        id = request.form.get("equip_id")
-        #print(str(id))
-        details = Harvest_Equipment.query.filter((Harvest_Equipment.equip_id == id)) 
-        #print(str(details[0].servicing_comp))
-        return render_template('/harvest_aider/contact_details.html',details = details)    
-    else:
-        return render_template('404.html')
-        
 @app.route('/factory_manager/')
 def factory_manager():
     if g.user and g.user[4] == 'M':

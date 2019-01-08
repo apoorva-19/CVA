@@ -1,5 +1,6 @@
 {% extends "/harvest_aider/harvest_aider_base.html" %}
 {% block content %}
+
 <div class="row clearfix">
     <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
         <div class="info-box hover-zoom-effect">
@@ -29,7 +30,7 @@
                 <i class="material-icons">shopping_cart</i>
             </div>
             <div class="content">
-                <div class="text">BALES COLLECTED</div>
+                <div class="text">BAILS COLLECTED</div>
                 <div class="number count-to" data-from="0" data-to="117" data-speed="1000" data-fresh-interval="20"></div>
             </div>
         </div>
@@ -46,66 +47,60 @@
         </div>
     </div>
 </div>
-
+<br>
+<br>
 <div class="row clearfix">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
             <div class="header">
                 <h2>
-                    JOBS SCHEDULED
+                    EQUIPMENT MAINTENANCE
                 </h2>
             </div>
             <div class="body table-responsive">
-                <table class="table table-hover">
+                <div>           
+                    <h4> Insert specific equipment for servicing </h4>
+                    <form method="POST" action={{ url_for('insert') }}>
+                        <label for="specific_equip"><h4> Enter Equipment ID </h4></label>
+                        <input type="text" name="specific_equip" id="specific_equip">
+                        <br>
+                        <button type="submit" class="btn btn-success waves-effect">SUBMIT</button>
+                    </form>    
+                </div>    
+                <h2>OR</h2>
+                <h4> Insert equipments from the following list</h4>
+                <table class="table">
                     <thead>
                         <tr>
-                            <th>JOB NO</th>
-                            <th>DATE</th>
-                            <th>TIME</th>
-                            <th>COLLECTOR NAME</th>
-                            <th>FARMER NAME</th>
-                            <th>FEES</th>
-                            <th>STATUS</th>
-                            <th>BALES OF STALK</th>
+                            <td>name of equipment</td>
+                            <td>date of servicing</td>
+                            <td>put for maintenance</td>
+                            <td>contact details of mechanic</td>
                         </tr>
                     </thead>
                     <tbody>
-                        {% if joblist.count() > 0: %}
-                        {% for job in joblist %}
-                        <tr>
-                            <th scope="row">{{ job.job_no }}</th>
-                            <td>{{ job.date_job }}</td>
-                            <td>{{ job.time }}</td>
-                            <td>{{ job.collector_id }}</td>
-                            <td>{{ job.farmer_id }}</td>
-                            <td>{{ job.fees }}</td>
-                            {% if job.job_complete == 0: %}
-                            <td style="color: red">Incomplete</td>
-                            {% else: %}
-                            <td>Completed</td>
+                        <form class="form-control" method="POST" action={{ url_for('insert') }}>
+                        {% for e in equipments %}
+                            {% if e.available == 1 %}
+                                <tr>
+                                    <td><label for="inserted">{{ e.equip_name }}</label></td>
+                                    <td>{{ e.next_servicing }}</td>
+                                    <td>
+                                            <input type="checkbox" name="inserted" value={{ e.equip_id }}>
+                                    </td>
+                                    <td>{{ e.contact_person }}, {{ e.contact_number }} </td>
+                                </tr>
                             {% endif %}
-                            <td>{{ job.bales_collected }}</td>
-                        </tr>
                         {% endfor %}
-                        {% else: %}
-                        <tr>
-                            <th></th>
-                            <td></td>
-                            <td></td>
-                            <td>No records to display</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
+                    </tbody>    
                 </table>
-            </div>
+                            <button type="submit" class="btn btn-success waves-effect">Insert</button>
+                        </form>
+            </div>       
         </div>
     </div>
 </div>
-<script>
-    var collection = document.getElementById("job_schedule");
-    collection.classList.add("active")
-</script>
+    
+
+
 {% endblock %}
