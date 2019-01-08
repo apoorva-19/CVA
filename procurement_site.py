@@ -124,15 +124,19 @@ def login():
     if request.method == 'POST':
         session.pop('user', None)
         user = request.form['username']
+        if len(user) < 5:
+            flash('Incorrect login credentials!', category="error")    
+            return render_template('login.html')
         user_type = user[4]
-
         #Checking if the user is a patwari
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
-            if request.form['password'] == 'pass':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 flash('You were successfully logged in')
                 return redirect(url_for('farmer_list'))
+            else:
+                flash('Incorrect login credentials!', error)    
         
         #Checking if the user is a stalk collector
         elif user_type == 'S':
@@ -140,44 +144,53 @@ def login():
             if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 # session['username'] = db_pass.collector_name
-
                 session['username'] = db_pass.collector_name
-                return redirect(url_for('joblist'))            
+                return redirect(url_for('joblist'))  
+            else:
+                flash('Incorrect login credentials!', error)    
+              
 
         #Checking if the user is a gram panchyat member
         elif user_type == 'G':
             db_pass = Gram_Panchayat.query.filter_by(username=user).first()
-            if request.form['password'] == 'password123':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 session['username'] = user
                 flash('You were successfully logged in')
+            else:
+                flash('Incorrect login credentials!', error)    
+
             return redirect(url_for('request_generator'))
     
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
             # if check_password_hash(db_pass.passwo rd_hash,request.form['password']):
-            if request.form['password'] == 'pass':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
                 session['user'] = user
                 # session['username'] = db_pass.name
                 flash('You were successfully logged in')
                 return redirect(url_for('harvest_aider'))
+            else:
+                flash('Incorrect login credentials!', error)    
 
         #Checking if the user is a factory manager
         elif user_type == 'M':
             db_pass = Factory_Manager.query.filter_by(username=user).first()
-            # if check_password_hash(db_pass.password_hash,request.form['password']):
-            if request.form['password'] == 'pass':
+            if check_password_hash(db_pass.password_hash,request.form['password']):
+            # if request.form['password'] == 'pass':
                 session['user'] = user
                 # session['username'] = db_pass.name
-                return redirect(url_for('factory_manager'))        
-        
+                return redirect(url_for('factory_manager')) 
+            else:
+                flash('Incorrect login credentials!', error)    
+
+        else:               
+            flash('Incorrect login credentials!', error)    
     return render_template('login.html')
 
 def send_reset_email(uname, db_pass):
     token = db_pass.get_reset_token()
-    print("token: ",token)
-    print("uname: ",uname)
     session['token'] = token
     session['uname'] = uname
     msg = Message('Password Reset Request',
@@ -186,7 +199,7 @@ def send_reset_email(uname, db_pass):
     msg.html = render_template("email_format.html", uname=uname, token=token)                   
     mail.send(msg)
     
-@app.route('/forgot_passwd', methods=['GET', 'POST'])
+@app.route('/forgot_passwd/', methods=['GET', 'POST'])
 def reset_request():
     if request.method == 'GET':
         return render_template('forgot_passwd.html')
@@ -214,12 +227,14 @@ def reset_request():
         db_pass = Factory_Manager.query.filter_by(username=uname).first()
 
     if db_pass is None:
-        return render_template('forgot_passwd.html')
+        flash('Sorry! your link has expired.', error)
+        return render_template('forgot_passwd.html',)
     send_reset_email(uname, db_pass)
     print("db_pass:", db_pass)
-    return render_template('login.html')
+    flash('Email for password change has been sent', success)
+    return redirect(url_for('login'))
 
-@app.route('/forgot_passwd/reset', methods=['GET','POST'])
+@app.route('/forgot_passwd/reset/', methods=['GET','POST'])
 def reset_token():
     uname = session.get('uname', None)
     token = session.get('token', None)
@@ -251,7 +266,8 @@ def reset_token():
         print(hashed_password)
         user.password_hash = hashed_password
         db.session.commit()
-        return render_template('login.html')
+        flash('Password changed successfully', success)
+        return redirect(url_for('login'))
     return render_template('reset_password.html')
 
 @app.route('/logout/')
@@ -296,11 +312,10 @@ def insert_farmer():
             new_farmer = Farmer(new_id, request.form['name'], request.form['size'], request.form['contact_no'], request.form['aadhar_no'], request.form['village_name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'])
             db.session.add(new_farmer)
             db.session.commit()
-
+            flash('Farmer details added succesfully!')
         district = code.get('AN')
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
-
         return render_template('/patwari/insert_farmer.html', state=list(zip(state.values(), state.keys())), district_name=district_name)
     else:
         return render_template('404.html')
@@ -331,7 +346,7 @@ def add_collector():
             new_collector = Stalk_Collector(new_id, 'pass', request.form['name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'], request.form['contact_no'])
             db.session.add(new_collector)
             db.session.commit()
-            
+            flash('Stalk Collector information added succesfully!', success)
         district = code.get('AN')
         ind = list(range(1, len(district)+1))
         district_name = list(zip(ind, district))
@@ -399,6 +414,7 @@ def allocate_collector():
                     list_collector[i].hours_completed_today += farmer.expected_duration
                     list_eqiup[j].hours_completed_today += farmer.expected_duration
         db.session.commit()
+        flash('Allocation Successful!', success)
     else:
         return render_template('404.html')
 
@@ -414,6 +430,7 @@ def collection_request():
         new_req = Factory_Stalk_Collection(date, bales, ha.district, ha.district, ha.state)
         db.session.add(new_req)
         db.session.commit()
+        flash('Request sent successfully!')
         return redirect('/harvest_aider/add_collector')
     else:
         return render_template('404.html')    
@@ -587,6 +604,7 @@ def joblist():
                     l.bales_collected = b
                     l.fees = int(b)*20*amt_per_bales
                     db.session.commit()
+                    flash('Update Successful!')
         # print(now.strftime('%Y/%m/%d'))
         jl=Job_List.query.filter_by(collector_id=session['user'], date_job=str(now.strftime('%Y-%m-%d'))).all()
         # print(jl[0].collector_id)
@@ -596,6 +614,8 @@ def joblist():
 
         if len(jl) != 0:
             return render_template('/stalk_collector/index.html', data=jl)
+        
+        flash('No jobs for today!')
         return render_template('/stalk_collector/index.html', data=0)
     else:
         return render_template('404.html')
@@ -614,6 +634,7 @@ def date_schedule():
     else:
         return render_template('404.html')  
 
+#Update list to complete jobs
 @app.route('/stalk_collector/finjobs/', methods=['GET', 'POST'])
 def job_comp():
     if g.user and g.user[4] == 'S':
@@ -624,7 +645,8 @@ def job_comp():
                 for l in jlist:
                     l.job_complete = 1
                     db.session.commit()
-        return redirect('/stalk_collector/stalkcol')
+        flash('Update Successful!')            
+        return redirect('/stalk_collector/joblist')
     else:
         return render_template('404.html') 
 
@@ -686,5 +708,6 @@ def todays_report():
         return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
     else:
         return render_template('404.html')
+
 if __name__ == '__main__':
     app.run(debug=True,host="0.0.0.0", port=5000)
