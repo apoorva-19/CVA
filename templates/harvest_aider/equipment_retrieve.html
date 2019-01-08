@@ -61,23 +61,22 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <td>maintenance done</td>
                         <td>name of equipment</td>
                         <td>date of servicing</td>
-                        <td>maintenance done</td>
                     </tr>
                 </thead>
                 <tbody>
-                    <form class="form-control" method="POST" action={{ url_for('retrieve') }}>
+                    <form method="POST" action={{ url_for('retrieve') }}>
                     {% for e in equipments %}
-                        {% if e.available == 1 %}
-                            <tr>
-                                <td><label for="retrieved">{{ e.equip_name }}</label></td>
-                                <td>{{ e.last_servicing }}</td>
-                                <td>
-                                        <input type="checkbox" name="retrieved" value={{ e.equip_id }}>
-                                </td>
-                            </tr>
-                        {% endif %}
+                        <tr>
+                            <td>
+                            <input type="checkbox" name="retrieved" id={{ e.equip_id }} value={{ e.equip_id }}>
+                            <label for={{ e.equip_id }}></label>
+                            </td>
+                            <td>{{ e.name_equip }}</td>
+                            <td>{{ e.last_servicing }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>    
             </table>

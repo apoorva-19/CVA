@@ -58,45 +58,63 @@
                 </h2>
             </div>
             <div class="body table-responsive">
+            {% if flag == 1 %}
                 <div>           
                     <h4> Insert specific equipment for servicing </h4>
                     <form method="POST" action={{ url_for('insert') }}>
                         <label for="specific_equip"><h4> Enter Equipment ID </h4></label>
                         <input type="text" name="specific_equip" id="specific_equip">
                         <br>
-                        <button type="submit" class="btn btn-success waves-effect">SUBMIT</button>
-                    </form>    
+                        <!--<button type="submit" class="btn btn-success waves-effect">SUBMIT</button>
+                    </form> -->   
                 </div>    
                 <h2>OR</h2>
                 <h4> Insert equipments from the following list</h4>
                 <table class="table">
                     <thead>
                         <tr>
+                            <td>put for maintenance</td>
                             <td>name of equipment</td>
                             <td>date of servicing</td>
-                            <td>put for maintenance</td>
                             <td>contact details of mechanic</td>
                         </tr>
                     </thead>
                     <tbody>
-                        <form class="form-control" method="POST" action={{ url_for('insert') }}>
+                        <!--<form class="form-control" method="POST" action={{ url_for('insert') }}>-->
                         {% for e in equipments %}
-                            {% if e.available == 1 %}
-                                <tr>
-                                    <td><label for="inserted">{{ e.equip_name }}</label></td>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="inserted" id={{ e.equip_id }} value={{ e.equip_id }}>
+                                    <label for={{ e.equip_id }}></label>
+                                </td>
+                            <td>{{ e.name_equip }}</td>
                                     <td>{{ e.next_servicing }}</td>
-                                    <td>
-                                            <input type="checkbox" name="inserted" value={{ e.equip_id }}>
-                                    </td>
-                                    <td>{{ e.contact_person }}, {{ e.contact_number }} </td>
-                                </tr>
-                            {% endif %}
+                                <td>{{ e.contact_person }}, {{ e.contact_number }} </td>
+                            </tr>
                         {% endfor %}
                     </tbody>    
                 </table>
                             <button type="submit" class="btn btn-success waves-effect">Insert</button>
                         </form>
-            </div>       
+            </div>
+            {% elif flag == 0 %}     
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>name of equipment</td>
+                                <td>contact details of mechanic</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--<form class="form-control" method="POST" action={{ url_for('insert') }}>-->
+                                <tr>
+                                    <td>{{ specific_equip.name_equip }}</td>
+                                    <td>{{ specific_equip.contact_person }}, {{ specific_equip.contact_number }} </td>
+                                </tr>
+                        </tbody>    
+                    </table>
+                </div>
+            {% endif %}    
         </div>
     </div>
 </div>

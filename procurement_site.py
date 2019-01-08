@@ -119,6 +119,7 @@ def login():
         elif user_type == 'G':
             return redirect(url_for('request_generator'))
         elif user_type == 'A':
+            print()
             return redirect(url_for('harvest_aider'))
         if user_type == 'M':
             return redirect(url_for('factory_manager'))
@@ -588,7 +589,6 @@ def request_generator():
                         exp_dur -= 10
                         farm_size -= 12
                         j_id = gen_new_id(v.state, get_district_id(v.state, v.district), 'J')
-
                     job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, farm_size, 0, exp_dur)
                     db.session.add(job)
                     db.session.commit()
@@ -660,36 +660,40 @@ def insert():
     duration = datetime.timedelta(days=3)
     to_date = str((datetime.datetime.today() + duration).date())
     if flask.request.method == "POST":
-        inserted_equipments = request.form.get("inserted")
-        specific_equip = request.form['specific_id']
-        for i in inserted_equipments:
-            equip = Harvest_Equipment.query.filter_by(equip_id=i).first()
-            equip.available = 0
-            equip.last_serivicing = from_date
-        db.session.commit()    
-        # send_mail_for_service()
-    # equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1,
-                                                # Harvest_Equipment.next_servicing >= from_date,
-                                                # Harvest_Equipment.next_servicing <= to_date)
-    equipments = Harvest_Equipment.query.filter_by(equip_id='CH01E000005')
-    print(from_date)
-    print(to_date)
-    print(equipments)
-    return render_template('/harvest_aider/equipment_insert.html', equipments=equipments)
+        inserted_equipments = request.form.getlist("inserted")
+        specific_equip = request.form['specific_equip']
+        if inserted_equipments: 
+            for i in inserted_equipments:
+                print(i)
+                equip = Harvest_Equipment.query.filter_by(equip_id=i).first()
+                equip.available = 0
+                equip.last_servicing = from_date
+            db.session.commit()
+            flash('equipment inserted successfully', 'success')    
+
+        elif specific_equip:    
+            s_equip = Harvest_Equipment.query.filter_by(equip_id=specific_equip).first()
+            s_equip.available = 0
+            s_equip.last_servicing = from_date
+            flash('equipment inserted successfully', 'success')    
+            return render_template('/harvest_aider/equipment_insert.html',specific_equip=s_equip, flag=0)
+
+    equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1, db.between(Harvest_Equipment.next_servicing, from_date, to_date)).all()
+    return render_template('/harvest_aider/equipment_insert.html', equipments=equipments, flag=1)
 
 @app.route('/harvest_aider/maintenance/retieve', methods=['GET', 'POST'])
 def retrieve():
     if flask.request.method == "POST":
-        retrieved_equipments = request.form.get("retrieved")
+        retrieved_equipments = request.form.getlist("retrieved")
         for r in retrieved_equipments:
             retr = Harvest_Equipment.query.filter_by(equip_id=r).first()
             retr.available = 1
-            duration = datetime.timedelta(months=3)
+            duration = datetime.timedelta(days=90)
             to_date = (datetime.datetime.today() + duration).date()
             retr.next_servicing = to_date
-        db.session.commit()        
-    equipments= Harvest_Equipment.query.filter_by(available=0)    
-    print(equipments)
+        db.session.commit()  
+        flash('Equipment retrieved successfully!','success')      
+    equipments= Harvest_Equipment.query.filter_by(available=0).all()  
     return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments)
 
 # def send_mail_for_service():
