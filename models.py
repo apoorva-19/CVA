@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'mysecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://Smoke:Smoke_cva123@localhost/cva"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -65,6 +65,7 @@ class Patwari(db.Model):
         self.state = state
         self.contact_no = contact_no
         self.email_id = email_id
+        
 class Farmer(db.Model):
 
     __tablename__ = 'farmer'
@@ -77,7 +78,7 @@ class Farmer(db.Model):
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
-    request_harvest = db.Column(db.Integer, default=0)
+    request_harvest = db.Column(db.Integer, server_default='0')
 
     def __init__(self, farmer_id, farmer_name, farm_size, contact_no, adhaar, village_name, district_name, state):
         self.farmer_id = farmer_id
@@ -133,6 +134,7 @@ class Stalk_Collector(db.Model):
     contact_no = db.Column(db.String(10), unique=True, index=True)
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
+    employed_date = db.Column(db.Date)
     hours_of_work = db.Column(db.Integer, server_default='0')
     hours_completed_today = db.Column(db.Integer, server_default='0')
     email_id = db.Column(db.String(64), unique=True, index=True)
@@ -252,6 +254,7 @@ class Factory_Stalk_Collection(db.Model):
         self.village_name = village_name
         self.district_name = district_name
         self.state = state
+        
 class Harvest_Aider(db.Model):
 
     __tablename__ = 'harvest_aider'
@@ -370,3 +373,16 @@ class Factory_Manager(db.Model):
         self.email_id = email_id
         self.district_name = district_name
         self.state = state
+
+class Bales_Collected(db.Model):
+
+    __tablename__ = 'bales_collected'
+
+    collection_id = db.Column(db.Integer, primary_key=True)
+    collection_date = db.Column(db.Date)
+    collected_bales = db.Column(db.Integer)
+    sent_date = db.Column(db.Date)
+
+    def __int__(self, collection_date, collected_bales):
+        self.collection_date = collection_date
+        self.collection_bales = collected_bales

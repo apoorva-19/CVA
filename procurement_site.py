@@ -5,23 +5,19 @@ from datetime import timedelta
 import schedule
 import time
 import requests
-# from flask_mail import Mail
 
 import flask
 from flask import send_from_directory, flash
 from flask import Flask, render_template, url_for, redirect, request, session, g, make_response
 from flask_migrate import Migrate
-from fpdf import FPDF
-from flask_weasyprint import HTML, render_pdf
-from send_sms import url, headers, payload
-
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
-import models
-from models import app, db
-from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Manager, Factory_Stalk_Collection
 
+from models import app, db
+from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Manager, Factory_Stalk_Collection, Bales_Collected
+from gen_report import PDF
+from send_sms import url, headers, payload
 from state_district import code, state
 
 mail = Mail(app)
@@ -60,6 +56,17 @@ def update_unfinished_jobs():
     jl=Job_List.query.filter_by(date_job=str(yesterday.strftime('%Y-%m-%d')), job_complete=0).all()
     for job in jl:
         job.date_job = str(now.strftime('%Y-%m-%d'))
+    db.session.commit()
+
+#add the bales of stalk collected on that day to the bales_collected table
+def update_bales_collected():
+    jl = Job_List.query.filter_by(bales_collected > 0, date_job=str(now.strftime('%Y-%m-%d'))).all()
+    bales = 0
+    for job in jl:
+        bales += job.bales_collected
+    
+    bales_add = Bales_Collected(str(now.strftime('%Y-%m-%d')), bales)
+    db.session.add(bales_add)
     db.session.commit()
 
 #generate new id
@@ -101,6 +108,19 @@ def favicon():
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    if g.user:
+        user_type = g.user[4]
+        if user_type == 'P':
+            return redirect(url_for('farmer_list'))
+        elif user_type == 'S':
+            return redirect(url_for('joblist')) 
+        elif user_type == 'G':
+            return redirect(url_for('request_generator'))
+        elif user_type == 'A':
+            return redirect(url_for('harvest_aider'))
+        if user_type == 'M':
+            return redirect(url_for('factory_manager'))
+       
     if request.method == 'POST':
         session.pop('user', None)
         user = request.form['username']
@@ -398,6 +418,108 @@ def collection_request():
     else:
         return render_template('404.html')    
 
+def gen_stalk_collector_list(duration):
+    header = ['Collector Id', 'Collector Name', 'Contact Number', 'Employed_Date']
+    gen_by = [session['user'], session['username']]
+    # Add the date parameter
+    result = Stalk_Collector.query.filter_by(Stalk_Collector.employed_date >= datetime.strptime(duration[0], "%Y-%m-%d"), Stalk_Collector.employed_date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
+    print(type(result))
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_title('ETHANOWELL')
+    pdf.report_title('Stalk Collector List')
+    pdf.report_desc(duration, gen_by)
+    pdf.table(header, data)
+    pdf.output("Stalk_Collector_List"+str(now)+".pdf", 'F')
+    return "success"
+
+def gen_equip_list(duration):
+    header = ['Equipment Id', 'Equip. Name', 'Equip. Type', 'Last Servicing', 'Next Servicing']
+    gen_by = [session['user'], session['username']]
+    result = Harvest_Equipment.query.filter_by(Harvest_Equipment.next_servicing >= datetime.strptime(duration[0], "%Y-%m-%d"), Harvest_Equipment.next_servicing <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_title('ETHANOWELL')
+    pdf.report_title('Equipment List')
+    pdf.report_desc(duration, gen_by)
+    pdf.table(header, data)
+    pdf.output("Equipment_List"+str(now)+".pdf", 'F')
+    return "success"
+
+def gen_job_list(duration):
+    header = ['Job Id', 'Stalk Collector', 'Farmer', 'Date', 'Status', 'Bales Collected']
+    gen_by = [session['user'], 'ABC']
+    result = db.session.query(Job_List,Stalk_Collector, Farmer).filter_by(collector_id = Stalk_Collector.collector_id).filter_by(farmer_id = Farmer.farmer_id).filter(db.between(Job_List.date_job, duration[0], duration[1])).all()
+    print(result)
+    # pdf = PDF()
+    # pdf.add_page()
+    # pdf.set_title('ETHANOWELL')
+    # pdf.report_title('Job List')
+    # pdf.report_desc(duration, gen_by)
+    # pdf.table(header, data)
+    # pdf.output("Job_List"+str(now)+".pdf", 'F')
+    return "success"
+
+def gen_bales_collected_list(duration):
+    header = ['Date', 'Bales Collected', 'Sent to Factory On']
+    gen_by = [session['user'], session['username']]    
+    result = Bales_Collected.query.filter_by(Bales_Collected.sent_date >= datetime.strptime(duration[0], "%Y-%m-%d"), Bales_Collected.sent_date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_title('ETHANOWELL')
+    pdf.report_title('Bales Collection List')
+    pdf.report_desc(duration, gen_by)
+    pdf.table(header, data)
+    pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
+    return "success"
+
+def gen_id_req_list(duration):
+    header = ['Date', 'Bales Collected', 'Sent to Factory On']
+    gen_by = [session['user'], session['username']]
+    result = Request_user_id.query.filter_by(Request_user_id.date >= datetime.strptime(duration[0], "%Y-%m-%d"), Request_user_id.date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_title('ETHANOWELL')
+    pdf.report_title('Bales Collection List')
+    pdf.report_desc(duration, gen_by)
+    pdf.table(header, data)
+    pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
+    return "success"
+
+def gen_truck_req_list(duration):
+    header = ['Date', 'Bales Collected', 'Sent to Factory On']
+    gen_by = [session['user'], session['username']]
+    result = Factory_Stalk_Collection.query.filter_by(Factory_Stalk_Collection.date_request >= datetime.strptime(duration[0], "%Y-%m-%d"), Factory_Stalk_Collection.date_request <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_title('ETHANOWELL')
+    pdf.report_title('Bales Collection List')
+    pdf.report_desc(duration, gen_by)
+    pdf.table(header, data)
+    pdf.output("Truck_Request_List"+str(now)+".pdf", 'F')
+    return "success"
+
+@app.route('/harvest_aider/reports/', methods=['GET', 'POST'])
+def gen_report():
+    if g.user and g.user[4] == 'A':
+        if request.method == 'POST':
+            report_type = request.form['report_type']
+            print(report_type)
+            duration = [request.form['start_date'], request.form['end_date']]
+            switcher = {
+                "0": gen_stalk_collector_list,
+                "1": gen_equip_list,
+                "2": gen_job_list,
+                "3": gen_bales_collected_list,
+                "4": gen_id_req_list,
+                "5": gen_truck_req_list
+            }
+
+            result = switcher.get(str(report_type), "failure")(duration)
+        return render_template('reports/index.html')
+    else:
+        return render_template('404.html')
+
 #Generate reports
 @app.route('/harvest_aider/reports/job_list<date>.pdf/')
 # def job_list_report(date):
@@ -419,6 +541,7 @@ def pdf_report(date):
     response.headers.set('Content-Disposition', 'attachment', filename='report'+date+ '.pdf')
     response.headers.set('Content-Type', 'application/pdf')
     return response
+
 
 # Request for harvesting by people employed in the Gram Panchanyat
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
