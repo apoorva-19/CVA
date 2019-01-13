@@ -58,35 +58,43 @@
                 </h2>
             </div>
             <div class="body table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <td>maintenance done</td>
-                        <td>name of equipment</td>
-                        <td>date of servicing</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <form method="POST" action={{ url_for('retrieve') }}>
-                    {% for e in equipments %}
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>
-                            <input type="checkbox" name="retrieved" id={{ e.equip_id }} value={{ e.equip_id }}>
-                            <label for={{ e.equip_id }}></label>
-                            </td>
-                            <td>{{ e.name_equip }}</td>
-                            <td>{{ e.last_servicing }}</td>
+                            <td>maintenance done</td>
+                            <td>name of equipment</td>
+                            <td>date of servicing</td>
                         </tr>
-                    {% endfor %}
-                </tbody>    
-            </table>
-                        <button type="submit" class="btn btn-success waves-effect">Retrieve</button>
-                    </form>
-            </div>       
+                    </thead>
+                    <tbody>
+                        <form method="POST" action={{ url_for('retrieve') }}>
+                            {% if equipments.count(name_equip) > 0 %}
+                            {% for e in equipments %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="retrieved" id={{ e.equip_id }} value={{ e.equip_id }}>
+                                    <label for={{ e.equip_id }}></label>
+                                </td>
+                                <td>{{ e.name_equip }}</td>
+                                <td>{{ e.last_servicing }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td></td>
+                                <td>No records to display</td>
+                                <td></td>
+                            </tr>
+                            {% endif %} 
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-success waves-effect">Retrieve</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-    
+
 
 
 {% endblock %}

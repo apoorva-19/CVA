@@ -108,7 +108,9 @@ class Harvest_Equipment(db.Model):
     servicing_comp = db.Column(db.String(25))
     contact_person = db.Column(db.String(40))
     contact_number = db.Column(db.String(10))
-    # email_id = db.Column(db.String(256), unique=True, index=True)
+    district = db.Column(db.String(25))
+    state = db.Column(db.String(2))
+
     hours_completed_today = db.Column(db.Integer, server_default='0')
 
     def __init__(self, available, equip_id, name_equip, type_equip, manufac_cmp, year_of_purchase, last_servicing, next_servicing, servicing_comp, contact_person, contact_number, hours_completed_today):

@@ -73,7 +73,8 @@
                     <img src="{{ url_for('static',filename='images/user.png') }}" width="48" height="48" alt="User" />
                 </div>
                 <div class="info-container">
-                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ session['username'] }}</div>
+                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{
+                        session['username'] }}</div>
                     <div class="btn-group user-helper-dropdown">
                         <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
                         <ul class="dropdown-menu pull-right">
@@ -132,23 +133,23 @@
                         </a>
                     </li>
 
-                   <li id="equip_maintenance">
+                    <li id="equip_maintenance">
                         <a href="#" class="menu-toggle">
                             <i class="material-icons">build</i>
                             <span>Maintenance of Equipment</span>
                         </a>
-                            <ul class="ml-menu">
-                                <li id="put">
-                                    <a href={{ url_for('insert') }}>
-                                        <span>Insert Equipment</span>
-                                    </a>
-                                </li>
-                                <li id="remove">
-                                    <a href={{ url_for('retrieve') }}>
-                                        <span>Retrieve Equipment</span>
-                                    </a>
-                                </li>
-                            </ul>
+                        <ul class="ml-menu">
+                            <li id="put">
+                                <a href={{ url_for('insert') }}>
+                                    <span>Insert Equipment</span>
+                                </a>
+                            </li>
+                            <li id="remove">
+                                <a href={{ url_for('retrieve') }}>
+                                    <span>Retrieve Equipment</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -169,29 +170,29 @@
     </section>
 
     <section class="content">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category,message in messages %}
-                    {% if category == "error" %}
-                    <div class="alert bg-red alert-dismissible" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        {{ message }}
-                    </div>
-                    {% endif %}
-                    {% if category=="warning" %}
-                    <div class="alert bg-yellow alert-dismissible" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        {{ message }}
-                    </div>
-                    {% endif %}
-                    {% if category=="success" %}
-                    <div class="alert bg-green alert-dismissible" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        {{ message }}
-                    </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category,message in messages %}
+        {% if category == "error" %}
+        <div class="alert bg-red alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ message }}
+        </div>
+        {% endif %}
+        {% if category=="warning" %}
+        <div class="alert bg-yellow alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ message }}
+        </div>
+        {% endif %}
+        {% if category=="success" %}
+        <div class="alert bg-green alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
         {% endwith %}
         {% block content %}
 
@@ -206,12 +207,14 @@
                     <h4 class="modal-title" id="alocateLabel">Allocate Collectors</h4>
                 </div>
                 <div class="modal-body">
-                    Would you like to allocate Collectors?
+                <form method="POST" action={{ url_for('allocate_collector') }}>
+                        Would you like to allocate Collectors?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
-                    <button type="button" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
+                    <button type="submit" value="yes" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
+                    <button type="dubmit" value="no" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
                 </div>
+                </form>
             </div>
         </div>
     </div>
@@ -274,90 +277,3 @@
 </body>
 
 </html>
-
-<!--
-                    <li id="equip_maintenance">
-                        <a href="#" class="menu-toggle">
-                            <i class="material-icons">build</i>
-                            <span>8. Maintenance of Equipment</span>
-                        </a>
-                            <ul class="ml-menu">
-                                <li id="put">
-                                    <a href={{ url_for('insert') }}>
-                                        <span>Insert Equipment</span>
-                                    </a>
-                                </li>
-                                <li id="remove">
-                                    <a href={{ url_for('retrieve') }}>
-                                        <span>Retrieve Equipment</span>
-                                    </a>
-                                </li>
-                            </ul>
-                    </li>
-
-            <div class="menu">
-                <ul class="list">
-                    <li id="header" class="header">
-                        MAIN NAVIGATION
-                    </li>
-                    <li id="home">
-                        <a href={{ url_for('harvest_aider') }}>
-                            <i class="material-icons">home</i>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li id="request_harvest">
-                        <a href={{ url_for('gen_user_id') }}>
-                            <i class="material-icons">format_list_numbered</i>
-                            <span>List of Requests</span>
-                        </a>
-                    </li>
-                    <li id="allocate_collector">
-                        <a data-toggle="modal" data-target="#allocate">
-                            <i class="material-icons">touch_app</i>
-                            <span>Allocate Stalk Collector</span>
-                        </a>
-                    </li>
-                    <li id="job_schedule">
-                        <a href={{ url_for('show_job_schedule') }}>
-                            <i class="material-icons">list</i>
-                            <span>Complete Job Schedule</span>
-                        </a>
-                    </li>
-                    <li id="add_collector">
-                        <a href={{ url_for('add_collector') }}>
-                            <i class="material-icons">person_add</i>
-                            <span>Add New Stalk Collector</span>
-                        </a>
-                    </li>
-                    <li id="request_truck">
-                        <a data-toggle="modal" data-target="#requesting_truck">
-                            <i class="material-icons">local_shipping</i>
-                            <span>Request Stalk Collection</span>
-                        </a>
-                    </li>
-                    <li id="report_gen_harvest">
-                        <a data-toggle="modal" data-target="#">
-                            <i class="material-icons">book</i>
-                            <span>Generate Report <br></span>
-                            <br>
-                        </a>
-                    </li>
-                    <li id="request_truck">
-                        <a data-toggle="modal" data-target="#requesting_truck">
-                            <i class="material-icons">local_shipping</i>
-                            <span>6. Request Stalk Collection</span>
-                        </a>
-                    </li>
-                    <li id="report_gen_harvest">
-                        <a data-toggle="modal" data-target="#">
-                            <i class="material-icons">book</i>
-                            <span>7. Generate Report <br></span>
-                            <br>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-
--->

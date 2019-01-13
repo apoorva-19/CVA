@@ -119,7 +119,6 @@ def login():
         elif user_type == 'G':
             return redirect(url_for('request_generator'))
         elif user_type == 'A':
-            print()
             return redirect(url_for('harvest_aider'))
         if user_type == 'M':
             return redirect(url_for('factory_manager'))
@@ -134,9 +133,12 @@ def login():
         #Checking if the user is a patwari
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+            if pwd_hash == True:
                 session['user'] = user
                 session['username'] = db_pass.patwari_name
+                session['state'] = db_pass.state
+                session['district'] = db_pass.district_name
                 flash('You were successfully logged in', 'success')
                 return redirect(url_for('farmer_list'))
             else:
@@ -145,10 +147,12 @@ def login():
         #Checking if the user is a stalk collector
         elif user_type == 'S':
             db_pass = Stalk_Collector.query.filter_by(collector_id=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+            if pwd_hash == True:
                 session['user'] = user
-                # session['username'] = db_pass.collector_name
                 session['username'] = db_pass.collector_name
+                session['state'] = db_pass.state
+                session['district'] = db_pass.district_name
                 return redirect(url_for('joblist'))  
             else:
                 flash('Incorrect login credentials!', 'error')    
@@ -157,9 +161,13 @@ def login():
         #Checking if the user is a gram panchyat member
         elif user_type == 'G':
             db_pass = Gram_Panchayat.query.filter_by(username=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+            if pwd_hash == True:
                 session['user'] = user
                 session['username'] = user
+                session['state'] = db_pass.state
+                session['district'] = db_pass.district_name
+
                 flash('You were successfully logged in', 'success')
             else:
                 flash('Incorrect login credentials!', 'error')    
@@ -169,9 +177,13 @@ def login():
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
+            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+            if pwd_hash == True:
                 session['user'] = user
                 session['username'] = db_pass.name
+                session['state'] = db_pass.state
+                session['district'] = db_pass.district
+
                 flash('You were successfully logged in', 'success')
                 return redirect(url_for('harvest_aider'))
             else:
@@ -180,10 +192,13 @@ def login():
         #Checking if the user is a factory manager
         elif user_type == 'M':
             db_pass = Factory_Manager.query.filter_by(username=user).first()
-            if check_password_hash(db_pass.password_hash,request.form['password']):
-            # if request.form['password'] == 'pass':
+            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+            if pwd_hash == True:
                 session['user'] = user
                 session['username'] = db_pass.name
+                session['state'] = db_pass.state
+                session['district'] = db_pass.district_name
+
                 return redirect(url_for('factory_manager')) 
             else:
                 flash('Incorrect login credentials!', 'error')    
@@ -397,31 +412,11 @@ def gen_user_id():
         return render_template('404.html')
 
 #Allocating collectors and equipments to the farmers
-@app.route('/harvest_aider/allocate/')
+@app.route('/harvest_aider/allocate/', methods=['POST'])
 def allocate_collector():
     if g.user and g.user[4] == 'A':
-        list_farmer = Job_List.query.filter(Job_List.collector_id == None)
-        list_collector = Stalk_Collector.query.filter(Stalk_Collector.hours_completed_today < 10)
-        list_eqiup = Harvest_Equipment.query.filter(Harvest_Equipment.hours_completed_today < 10)
-        for farmer in list_farmer:
-            i = 0
-            while (i < list_collector.count()) and (list_collector[i].hours_completed_today + farmer.expected_duration > 10) :
-                i += 1
-            if i < list_collector.count():
-                j = 0
-                while (j < list_eqiup.count()) and (list_eqiup[j].hours_completed_today + farmer.expected_duration > 10):
-                    j += 1
-                if j < list_eqiup.count():
-                    farmer.date_job = now.strftime('%d/%m/%y')
-                    if list_collector[i].hours_completed_today != 0:
-                        start_time = datetime.timedelta(hours=list_collector[i].hours_completed_today)
-                    farmer.time = str(start_time)
-                    farmer.collector_id = list_collector[i].collector_id
-                    farmer.equip_id = list_eqiup[j].equip_id
-                    list_collector[i].hours_completed_today += farmer.expected_duration
-                    list_eqiup[j].hours_completed_today += farmer.expected_duration
-        db.session.commit()
-        flash('Allocation Successful!', 'success')
+        print("hello")
+        return redirect(url_for('harvest_aider'))
     else:
         return render_template('404.html')
 
@@ -678,7 +673,7 @@ def insert():
             flash('equipment inserted successfully', 'success')    
             return render_template('/harvest_aider/equipment_insert.html',specific_equip=s_equip, flag=0)
 
-    equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1, db.between(Harvest_Equipment.next_servicing, from_date, to_date)).all()
+    equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1, db.between(Harvest_Equipment.next_servicing, from_date, to_date),Harvest_Equipment.state==session['state'], Harvest_Equipment.district==session['district']).all()
     return render_template('/harvest_aider/equipment_insert.html', equipments=equipments, flag=1)
 
 @app.route('/harvest_aider/maintenance/retieve', methods=['GET', 'POST'])
@@ -693,7 +688,7 @@ def retrieve():
             retr.next_servicing = to_date
         db.session.commit()  
         flash('Equipment retrieved successfully!','success')      
-    equipments= Harvest_Equipment.query.filter_by(available=0).all()  
+    equipments= Harvest_Equipment.query.filter(Harvest_Equipment.available==0, Harvest_Equipment.state==session['state'], Harvest_Equipment.district==session['district']).all()  
     return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments)
 
 # def send_mail_for_service():
