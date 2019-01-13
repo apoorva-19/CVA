@@ -90,9 +90,6 @@ class Farmer(db.Model):
         self.district_name = district_name
         self.state = state
 
-    def __repr__(self):
-        print("Farmer id {1}, Farmer name {2}").format(self.farmer_id, self.farmer_name)
-
 class Harvest_Equipment(db.Model):
 
     __tablename__ = 'harvest_equipment'
@@ -207,13 +204,12 @@ class Request_Harvest(db.Model):
 
     request_id = db.Column(db.Integer, primary_key=True)
     requestor_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
-    req_gen = db.relationship('Gram_Panchayat', backref='request_harvest', uselist=False, foreign_keys=[requestor_id])
     no_farmers = db.Column(db.Integer)
-    date_request = db.Column(db.Date)
+    datetime = db.Column(db.DateTime)
     jobs_completed = db.Column(db.Integer, server_default='0')
     req_gen = db.relationship(Gram_Panchayat, backref='request_harvest', uselist=False, foreign_keys=requestor_id)
 
-    def __init__(self, request_id , requestor_id, no_farmers, date_request):
+    def __init__(self, request_id, requestor_id, no_farmers, date_request):
         self.request_id = request_id
         self.requestor_id = requestor_id
         self.no_farmers = no_farmers
@@ -226,7 +222,6 @@ class Request_user_id(db.Model):
     new_user_id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     req_gen_id = db.Column(db.String(20), db.ForeignKey('gram_panchayat.username'))
-    req_gen = db.relationship('Gram_Panchayat', backref='request_user_id', uselist=False, foreign_keys=[req_gen_id])
     no_gen = db.Column(db.Integer)
     req_complete = db.Column(db.Integer, server_default='0')
     req_gen = db.relationship(Gram_Panchayat, backref='request_user_id', uselist=False, foreign_keys=req_gen_id)
@@ -267,7 +262,7 @@ class Harvest_Aider(db.Model):
     password_hash = db.Column(db.String(128))
     name = db.Column(db.String(40))
     contact_no = db.Column(db.String(10), unique=True, index=True)
-    district = db.Column(db.String(20))
+    district_name = db.Column(db.String(20))
     state = db.Column(db.String(2))
     no_villages = db.Column(db.Integer)
     email_id = db.Column(db.String(256), unique=True, index=True)
@@ -340,6 +335,7 @@ class User_Id(db.Model):
     gram_panchayat_cnt = db.Column(db.Integer, server_default='0')
     job_cnt = db.Column(db.Integer, server_default='0')
     patwari_cnt = db.Column(db.Integer, server_default='0')
+    request_cnt = db.Column(db.Integer, server_default='0')
 
     def __init__(self, state_district):
         self.state_district = state_district

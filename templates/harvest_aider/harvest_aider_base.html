@@ -126,7 +126,7 @@
                         </a>
                     </li>
                     <li id="report_gen_harvest">
-                        <a data-toggle="modal" data-target="#">
+                        <a href="{{ url_for('gen_report')}}">
                             <i class="material-icons">book</i>
                             <span>Generate Report <br></span>
                             <br>
@@ -206,14 +206,14 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="alocateLabel">Allocate Collectors</h4>
                 </div>
-                <div class="modal-body">
-                <form method="POST" action={{ url_for('allocate_collector') }}>
+                <form method="POST" action={{ url_for('allocating_collector') }}>
+                    <div class="modal-body">
                         Would you like to allocate Collectors?
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" value="yes" class="btn btn-link waves-effect bg-light-green" data-dismiss="modal">YES</button>
-                    <button type="dubmit" value="no" class="btn btn-link waves-effect bg-grey" data-dismiss="modal">NO</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="yes" name="allocating" type="submit" value="yes" class="btn btn-link waves-effect bg-light-green">YES</button>
+                        <button id="no" name="allocating" type="submit" value="no" class="btn btn-link waves-effect bg-grey">NO</button>
+                    </div>
                 </form>
             </div>
         </div>

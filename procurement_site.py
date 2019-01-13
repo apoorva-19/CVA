@@ -18,7 +18,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import app, db
-from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Manager, Factory_Stalk_Collection, Bales_Collected
+from models import Job_List, Request_user_id, Stalk_Collector, Harvest_Equipment, Farmer, Patwari, Gram_Panchayat, Harvest_Aider, User_Id, Factory_Manager, Factory_Stalk_Collection, Bales_Collected, Request_Harvest
 from gen_report import PDF
 from send_sms import url, headers, payload
 from state_district import code, state
@@ -27,7 +27,6 @@ mail = Mail(app)
 Migrate(app, db)
 now = datetime.datetime.now()
 yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
-start_time = datetime.timedelta(hours=9)
 amt_per_bales = 1.75
 
 #send messages
@@ -75,27 +74,31 @@ def update_bales_collected():
 def gen_new_id(state, district_no, col_type):
     #For example: MH06J000023
     st_dis = state+str(district_no).zfill(2) 
-    cnt = User_Id.query.filter_by(state_district=st_dis).first()
+    cnt = User_Id.query.filter_by(state_district=st_dis).first()    
     if cnt != None:
         if col_type == 'F':
-            id_number = cnt.farmer_cnt
+            id_number = cnt.farmer_cnt+1
             cnt.farmer_cnt += 1
         elif col_type == 'S':
-            id_number = cnt.stalk_collector_cnt
+            id_number = cnt.stalk_collector_cnt+1
             cnt.stalk_collector_cnt += 1
         elif col_type == 'A':
-            id_number = cnt.harvest_aider_cnt
+            id_number = cnt.harvest_aider_cnt+1
             cnt.harvest_aider_cnt += 1
         elif col_type == 'E':
-            id_number = cnt.harvest_equip_cnt
+            id_number = cnt.harvest_equip_cnt+1
             cnt.harvest_equip_cnt += 1
         elif col_type == 'J':
-            id_number = cnt.job_cnt
+            id_number = cnt.job_cnt+1
             cnt.job_cnt += 1
-        else:
-            id_number = cnt.patwari_cnt
+        elif col_type == 'P':
+            id_number = cnt.patwari_cnt+1
             cnt.patwari_cnt += 1
-
+        else:
+            id_number = cnt.request_cnt+1
+            cnt.request_cnt += 1
+            db.session.commit()
+            return id_number
         db.session.commit()
 
         new_id = st_dis+col_type+str(id_number+1).zfill(6)
@@ -130,6 +133,7 @@ def login():
             flash('Incorrect login credentials!', 'error')   
             return render_template('login.html')
         user_type = user[4]
+
         #Checking if the user is a patwari
         if user_type == 'P':
             db_pass = Patwari.query.filter_by(patwari_id=user).first()
@@ -199,6 +203,7 @@ def login():
                 session['state'] = db_pass.state
                 session['district'] = db_pass.district_name
 
+                flash('You were successfully logged in', 'success')
                 return redirect(url_for('factory_manager')) 
             else:
                 flash('Incorrect login credentials!', 'error')    
@@ -250,8 +255,8 @@ def reset_request():
         flash('Incorrect Username, please try again', 'error')
         return render_template('forgot_passwd.html',)
     send_reset_email(uname, db_pass)
-    print("db_pass:", db_pass)
-    flash('Email for password change has been sent', 'success')
+    # print("db_pass:", db_pass)
+    flash('Email for password change has been sent', success)
     return redirect(url_for('login'))
 
 @app.route('/forgot_passwd/reset/', methods=['GET','POST'])
@@ -278,13 +283,10 @@ def reset_token():
         #if the user is a factory manager
         elif uname[4] == 'M':
             user = Factory_Manager.verify_reset_token(token)
-        print(user)    
         if user is None:
             flash('Sorry! your reset link has expired, please try again','warning')
             return redirect(url_for('reset_request'))
         hashed_password =  generate_password_hash(request.form['password'])
-        print(request.form['password'])
-        print(hashed_password)
         user.password_hash = hashed_password
         db.session.commit()
         flash('Password changed successfully', 'success')
@@ -304,6 +306,9 @@ def before_request():
     g.user = None
     if 'user' in session:
         g.user = session['user']
+        g.username = session['username']
+        g.state = session['state']
+        g.district = session['district']
 
 #returns the district code 
 def get_district_id(state, district):
@@ -329,7 +334,6 @@ def insert_farmer():
             if new_id == None:
                 return render_template('500.hmtl')
             #Inserting the farmer details into the database
-            print(request.form['size'])
             new_farmer = Farmer(new_id, request.form['name'], request.form['size'], request.form['contact_no'], request.form['aadhar_no'], request.form['village_name'], code.get(request.form['state'])[int(request.form['district_name'])-1], request.form['state'])
             db.session.add(new_farmer)
             db.session.commit()
@@ -394,6 +398,7 @@ def city(state):
 
     return json.dumps({'cities' : cityArray})
 
+#shows the schedule to the harvest aider 
 @app.route('/harvest_aider/job_schedule/')    
 def show_job_schedule():
     if g.user and g.user[4] == 'A':
@@ -403,6 +408,7 @@ def show_job_schedule():
     else:
         return render_template('404.html')
 
+# displays the list of requests for new member ids in the gram panchayat
 @app.route('/harvest_aider/gen_user_id/')
 def gen_user_id():
     if g.user and g.user[4] == 'A':
@@ -412,10 +418,29 @@ def gen_user_id():
         return render_template('404.html')
 
 #Allocating collectors and equipments to the farmers
-@app.route('/harvest_aider/allocate/', methods=['POST'])
-def allocate_collector():
+@app.route('/harvest_aider/allocate/', methods=['GET','POST'])
+def allocating_collector():    
     if g.user and g.user[4] == 'A':
-        print("hello")
+        if request.method == 'POST':
+            if request.form['allocating'] == 'yes':
+                start_time = datetime.timedelta(hours=9)
+                state_district = g.user[0:4]
+                list_farmer = Job_List.query.filter(Job_List.collector_id == None, Job_List.farmer_id.like('%'+state_district+'%'))
+                list_collector = Stalk_Collector.query.filter(Stalk_Collector.hours_completed_today < 10, Stalk_Collector.collector_id.like('%'+state_district+'%'))
+                for farmer in list_farmer:
+                    i = 0
+                    while (i < list_collector.count()) and (list_collector[i].hours_completed_today + farmer.expected_duration > 10) :
+                        i += 1
+                    if i < list_collector.count():        
+                        farmer.date_job = now.strftime('%Y-%m-%d')
+                        if list_collector[i].hours_completed_today != 0:
+                            start_time = datetime.timedelta(hours=list_collector[i].hours_completed_today+9)
+                        farmer.time = start_time
+                        farmer.collector_id = list_collector[i].collector_id
+                        farmer.equip_id = list_collector[i].equip_id
+                        list_collector[i].hours_completed_today += farmer.expected_duration
+                db.session.commit()
+                flash('Allocation Successful!', 'success')
         return redirect(url_for('harvest_aider'))
     else:
         return render_template('404.html')
@@ -424,106 +449,138 @@ def allocate_collector():
 @app.route('/harvest_aider/collection_request/', methods=['GET', 'POST'])
 def collection_request():
     if g.user and g.user[4] == 'A':
-        ha = Harvest_Aider.query.filter_by(aider_id=session['user']).first()
-        print(session['user'])
-        print(ha.aider_id)
-        date = request.form['date']
-        bales = request.form['bales']
-        new_req = Factory_Stalk_Collection(date, bales, ha.district, ha.district, ha.state)
-        db.session.add(new_req)
-        db.session.commit()
-        flash('Request sent successfully!')
-        return redirect('/harvest_aider/add_collector')
+        if request.method == 'POST':
+            date = request.form['date']
+            bales = request.form['bales']
+            new_req = Factory_Stalk_Collection(date, bales, g.district, g.district, g.state)
+            db.session.add(new_req)
+            db.session.commit()
+            flash('Request sent successfully!', 'success')
+            return redirect(url_for('harvest_aider'))
     else:
         return render_template('404.html')    
 
 def gen_stalk_collector_list(duration):
     header = ['Collector Id', 'Collector Name', 'Contact Number', 'Employed_Date']
-    gen_by = [session['user'], session['username']]
+    gen_by = [g.user, g.username]
     # Add the date parameter
-    result = Stalk_Collector.query.filter_by(Stalk_Collector.employed_date >= datetime.strptime(duration[0], "%Y-%m-%d"), Stalk_Collector.employed_date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
-    print(type(result))
-    pdf = PDF()
-    pdf.add_page()
-    pdf.set_title('ETHANOWELL')
-    pdf.report_title('Stalk Collector List')
-    pdf.report_desc(duration, gen_by)
-    pdf.table(header, data)
-    pdf.output("Stalk_Collector_List"+str(now)+".pdf", 'F')
-    return "success"
+    result = Stalk_Collector.query.filter_by(Stalk_Collector.employed_date >= duration[0], Stalk_Collector.employed_date <= duration[1]).all()
+    data = []
+    for res in result:
+        data.append(list([res.collector_id, res.collector_name, res.contact_no, res.employed_date]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Stalk Collector List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Stalk_Collector_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 def gen_equip_list(duration):
     header = ['Equipment Id', 'Equip. Name', 'Equip. Type', 'Last Servicing', 'Next Servicing']
     gen_by = [session['user'], session['username']]
-    result = Harvest_Equipment.query.filter_by(Harvest_Equipment.next_servicing >= datetime.strptime(duration[0], "%Y-%m-%d"), Harvest_Equipment.next_servicing <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
-    pdf = PDF()
-    pdf.add_page()
-    pdf.set_title('ETHANOWELL')
-    pdf.report_title('Equipment List')
-    pdf.report_desc(duration, gen_by)
-    pdf.table(header, data)
-    pdf.output("Equipment_List"+str(now)+".pdf", 'F')
-    return "success"
+    result = Harvest_Equipment.query.filter(Harvest_Equipment.next_servicing >= duration[0], Harvest_Equipment.next_servicing <= duration[1]).all()
+    data = []
+    for res in result:
+        data.append(list([res.equip_id, res.name_equip, res.type_equip, res.last_servicing, res.next_servicing]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Equipment List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Equipment_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 def gen_job_list(duration):
     header = ['Job Id', 'Stalk Collector', 'Farmer', 'Date', 'Status', 'Bales Collected']
-    gen_by = [session['user'], 'ABC']
+    gen_by = [g.user,g.username] 
     result = db.session.query(Job_List,Stalk_Collector, Farmer).filter_by(collector_id = Stalk_Collector.collector_id).filter_by(farmer_id = Farmer.farmer_id).filter(db.between(Job_List.date_job, duration[0], duration[1])).all()
-    print(result)
-    # pdf = PDF()
-    # pdf.add_page()
-    # pdf.set_title('ETHANOWELL')
-    # pdf.report_title('Job List')
-    # pdf.report_desc(duration, gen_by)
-    # pdf.table(header, data)
-    # pdf.output("Job_List"+str(now)+".pdf", 'F')
-    return "success"
+    print(result[0].Job_List.job_no)
+    data = []
+    for res in result:
+        data.append(list([res.Job_List.job_no,res.Stalk_Collector.collector_name, res.Farmer.farmer_name, res.Job_List.date_job, res.Job_List.job_complete, res.Job_List.bales_collected]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Job List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Job_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 def gen_bales_collected_list(duration):
     header = ['Date', 'Bales Collected', 'Sent to Factory On']
     gen_by = [session['user'], session['username']]    
-    result = Bales_Collected.query.filter_by(Bales_Collected.sent_date >= datetime.strptime(duration[0], "%Y-%m-%d"), Bales_Collected.sent_date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
-    pdf = PDF()
-    pdf.add_page()
-    pdf.set_title('ETHANOWELL')
-    pdf.report_title('Bales Collection List')
-    pdf.report_desc(duration, gen_by)
-    pdf.table(header, data)
-    pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
-    return "success"
+    result = Bales_Collected.query.filter(Bales_Collected.sent_date >= duration[0], Bales_Collected.sent_date <= duration[1]).all()
+    data = []
+    for res in result:
+        data.append(list([res.collection_date, res.collected_bales, res.sent_date]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Bales Collection List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 def gen_id_req_list(duration):
-    header = ['Date', 'Bales Collected', 'Sent to Factory On']
+    header = ['Date', 'Requesting Id', 'Number Requested']
     gen_by = [session['user'], session['username']]
-    result = Request_user_id.query.filter_by(Request_user_id.date >= datetime.strptime(duration[0], "%Y-%m-%d"), Request_user_id.date <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
-    pdf = PDF()
-    pdf.add_page()
-    pdf.set_title('ETHANOWELL')
-    pdf.report_title('Bales Collection List')
-    pdf.report_desc(duration, gen_by)
-    pdf.table(header, data)
-    pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
-    return "success"
+    result = Request_user_id.query.filter(Request_user_id.date >= duration[0], Request_user_id.date <= duration[1]).all()
+    data = []
+    for res in result:
+        data.append(list([res.date, res.request_gen_id, res.no_gen]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Bales Collection List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Bales_Collection_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 def gen_truck_req_list(duration):
-    header = ['Date', 'Bales Collected', 'Sent to Factory On']
+    header = ['Date of request', 'Bales', 'Date of fulfilment', 'No. Trucks']
     gen_by = [session['user'], session['username']]
-    result = Factory_Stalk_Collection.query.filter_by(Factory_Stalk_Collection.date_request >= datetime.strptime(duration[0], "%Y-%m-%d"), Factory_Stalk_Collection.date_request <= datetime.strptime(duration[1], "%Y-%m-%d")).all()
-    pdf = PDF()
-    pdf.add_page()
-    pdf.set_title('ETHANOWELL')
-    pdf.report_title('Bales Collection List')
-    pdf.report_desc(duration, gen_by)
-    pdf.table(header, data)
-    pdf.output("Truck_Request_List"+str(now)+".pdf", 'F')
-    return "success"
+    result = Factory_Stalk_Collection.query.filter(Factory_Stalk_Collection.date_request >= duration[0],Factory_Stalk_Collection.date_request <= duration[1]).all()
+    data = []
+    for res in result:
+        data.append(list([res.date_request, res.bales_stalk, res.date_fulfilment, res.no_trucks]))
+    if len(data):
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_title('ETHANOWELL')
+        pdf.report_title('Bales Collection List')
+        pdf.report_desc(duration, gen_by)
+        pdf.table(header, data)
+        pdf.output("Truck_Request_List"+str(now)+".pdf", 'F')
+        return "success"
+    else:
+        return "failure"
 
 @app.route('/harvest_aider/reports/', methods=['GET', 'POST'])
 def gen_report():
     if g.user and g.user[4] == 'A':
         if request.method == 'POST':
             report_type = request.form['report_type']
-            print(report_type)
             duration = [request.form['start_date'], request.form['end_date']]
             switcher = {
                 "0": gen_stalk_collector_list,
@@ -535,6 +592,10 @@ def gen_report():
             }
 
             result = switcher.get(str(report_type), "failure")(duration)
+            if result == "success":
+                flash('Report generated successfully',result)
+            else:
+                flash('Report not generated due to lack of data', result)
         return render_template('reports/index.html')
     else:
         return render_template('404.html')
@@ -565,30 +626,38 @@ def pdf_report(date):
 @app.route('/gram_panchayat/add_request/', methods=['GET', 'POST'])
 def request_generator():
     if g.user and g.user[4] == 'G':
-        gp = Gram_Panchayat.query.filter_by(username=session['user']).first()
-        farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
+        gp = Gram_Panchayat.query.filter_by(username=g.user).first()
         if flask.request.method == 'POST':
             returned_values = request.form.getlist('request')
+            request_id = gen_new_id(gp.state, get_district_id(gp.state, gp.district_name), 'R')
+            print(request_id)
+            requesting_harvest = Request_Harvest(request_id,g.user,len(returned_values),str(now.strftime("%Y-%m-%d %H:%M:%S")))
+            db.session.add(requesting_harvest)
+
             for i in returned_values:
                 val = Farmer.query.filter_by(farmer_id=i).all()
                 for v in val:
                     v.request_harvest = 1
                     #generating the job id
-                    j_id = gen_new_id(v.state, get_district_id(v.state, v.district), 'J')
+                    j_id = gen_new_id(v.state, get_district_id(v.state, v.district_name), 'J')
+                    print(j_id)
                     #calculating the job's expected duration
                     exp_dur = (v.farm_size/1.5)+((v.farm_size/1.5)/4)
                     farm_size = v.farm_size
                     #if duration is more than the 10
                     if exp_dur > 10:
-                        job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, 12, 0, 10)
+                        job = Job_List(j_id, v.farmer_id, request_id, v.village_name, 12, 0, 10)
                         exp_dur -= 10
                         farm_size -= 12
-                        j_id = gen_new_id(v.state, get_district_id(v.state, v.district), 'J')
-                    job = Job_List(j_id, v.farmer_id, session['user'], v.village_name, farm_size, 0, exp_dur)
+                        j_id = gen_new_id(v.state, get_district_id(v.state, v.district_name), 'J')
+
+                    job = Job_List(j_id, v.farmer_id, request_id, v.village_name, farm_size, 0, exp_dur)
                     db.session.add(job)
                     db.session.commit()
-        farmers = Farmer.query.filter_by(request_harvest=0, village_name=gp.village_name, state=gp.state).all()
-        return render_template('/gram_panchayat/add_req.html/', data=farmers)
+            flash('Update Successful!', "success")
+        farmers = Farmer.query.filter_by(request_harvest=0, district_name=gp.district_name, state=gp.state).all()
+        
+        return render_template('/gram_panchayat/add_req.html/', data=farmers, count=len(farmers))
     else:
         return render_template('404.html')
 
@@ -606,8 +675,8 @@ def joblist():
                     db.session.commit()
                     flash('Update Successful!', 'success')
         # print(now.strftime('%Y/%m/%d'))
-        jl=Job_List.query.filter_by(collector_id=session['user'], date_job=str(now.strftime('%Y-%m-%d'))).all()
-        print(jl)
+        jl=Job_List.query.filter_by(collector_id=g.user, date_job=str(now.strftime('%Y-%m-%d'))).all()
+        # print(jl[0].collector_id)
         for job in jl:
             job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
             job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")
@@ -625,7 +694,7 @@ def date_schedule():
     if g.user and g.user[4] == 'S':
         if flask.request.method == 'POST':
             date = request.form['date']
-            datewise=Job_List.query.filter_by(collector_id=session['user'], date_job = date).all()
+            datewise=Job_List.query.filter_by(collector_id=g.user, date_job = date).all()
             for job in datewise:
                 job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
             job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")

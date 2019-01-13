@@ -74,14 +74,14 @@ class PDF(FPDF):
         # Text height
         th = 10.0
         # Column Width
-        col_width = pdf.w / 4.5
+        col_width = pdf.w / 6.5
         # For bold header
-        pdf.set_font('Arial', 'B', 12)
+        pdf.set_font('Arial', 'B', 10)
         # Printing header
         for head in header:
             pdf.cell(col_width, th, str(head), border=1)
         pdf.ln(th)
-        pdf.set_font('Arial', '', 12)
+        pdf.set_font('Arial', '', 10)
         # Printing the table
         for row in data:
             # Printing each element
