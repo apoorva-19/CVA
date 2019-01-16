@@ -181,15 +181,16 @@ def login():
         #Checking if the user is a harvest aider
         elif user_type == 'A':
             db_pass = Harvest_Aider.query.filter_by(aider_id=user).first()
-            pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
-            if pwd_hash == True:
-                session['user'] = user
-                session['username'] = db_pass.name
-                session['state'] = db_pass.state
-                session['district'] = db_pass.district
-
-                flash('You were successfully logged in', 'success')
-                return redirect(url_for('harvest_aider'))
+            if len(db_pass.aider_id) > 0:
+                pwd_hash = check_password_hash(db_pass.password_hash,request.form['password'])
+                if pwd_hash == True:
+                    session['user'] = user
+                    session['username'] = db_pass.name
+                    session['state'] = db_pass.state
+                    session['district'] = db_pass.district_name
+                    print(session['district'])
+                    flash('You were successfully logged in', 'success')
+                    return redirect(url_for('harvest_aider'))
             else:
                 flash('Incorrect login credentials!', 'error')    
 
@@ -425,13 +426,13 @@ def allocating_collector():
             if request.form['allocating'] == 'yes':
                 start_time = datetime.timedelta(hours=9)
                 state_district = g.user[0:4]
-                list_farmer = Job_List.query.filter(Job_List.collector_id == None, Job_List.farmer_id.like('%'+state_district+'%'))
-                list_collector = Stalk_Collector.query.filter(Stalk_Collector.hours_completed_today < 10, Stalk_Collector.collector_id.like('%'+state_district+'%'))
+                list_farmer = Job_List.query.filter(Job_List.collector_id == None, Job_List.farmer_id.like('%'+state_district+'%')).all()
+                list_collector = Stalk_Collector.query.filter(Stalk_Collector.hours_completed_today < 10, Stalk_Collector.collector_id.like('%'+state_district+'%')).all()
                 for farmer in list_farmer:
                     i = 0
-                    while (i < list_collector.count()) and (list_collector[i].hours_completed_today + farmer.expected_duration > 10) :
+                    while (i < len(list_collector) and (list_collector[i].hours_completed_today + farmer.expected_duration > 10)):
                         i += 1
-                    if i < list_collector.count():        
+                    if i < len(list_collector):        
                         farmer.date_job = now.strftime('%Y-%m-%d')
                         if list_collector[i].hours_completed_today != 0:
                             start_time = datetime.timedelta(hours=list_collector[i].hours_completed_today+9)
@@ -439,7 +440,7 @@ def allocating_collector():
                         farmer.collector_id = list_collector[i].collector_id
                         farmer.equip_id = list_collector[i].equip_id
                         list_collector[i].hours_completed_today += farmer.expected_duration
-                db.session.commit()
+                        db.session.commit()
                 flash('Allocation Successful!', 'success')
         return redirect(url_for('harvest_aider'))
     else:
@@ -674,9 +675,7 @@ def joblist():
                     l.fees = int(b)*20*amt_per_bales
                     db.session.commit()
                     flash('Update Successful!', 'success')
-        # print(now.strftime('%Y/%m/%d'))
         jl=Job_List.query.filter_by(collector_id=g.user, date_job=str(now.strftime('%Y-%m-%d'))).all()
-        # print(jl[0].collector_id)
         for job in jl:
             job.date_job = datetime.datetime.strptime(str(job.date_job), '%Y-%m-%d').strftime('%d/%m/%Y')
             job.time = datetime.datetime.strptime(str(job.time), "%H:%M:%S").strftime("%I:%M %p")
@@ -721,12 +720,14 @@ def job_comp():
 @app.route('/harvest_aider/mainenance/insert', methods=['GET','POST'])
 def insert():
     from_date = str(now.strftime('%Y-%m-%d'))
+    print(from_date)
     duration = datetime.timedelta(days=3)
     to_date = str((datetime.datetime.today() + duration).date())
+    print(to_date)
     if flask.request.method == "POST":
         inserted_equipments = request.form.getlist("inserted")
         specific_equip = request.form['specific_equip']
-        if inserted_equipments: 
+        if inserted_equipments:
             for i in inserted_equipments:
                 print(i)
                 equip = Harvest_Equipment.query.filter_by(equip_id=i).first()
@@ -741,9 +742,11 @@ def insert():
             s_equip.last_servicing = from_date
             flash('equipment inserted successfully', 'success')    
             return render_template('/harvest_aider/equipment_insert.html',specific_equip=s_equip, flag=0)
-
-    equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1, db.between(Harvest_Equipment.next_servicing, from_date, to_date),Harvest_Equipment.state==session['state'], Harvest_Equipment.district==session['district']).all()
-    return render_template('/harvest_aider/equipment_insert.html', equipments=equipments, flag=1)
+    state_district = g.user[0:4]
+    print(state_district)
+    equipments = Harvest_Equipment.query.filter(Harvest_Equipment.available == 1, db.between(Harvest_Equipment.next_servicing, from_date, to_date), Harvest_Equipment.equip_id.like('%'+state_district+'%')).all()
+    print(equipments)
+    return render_template('/harvest_aider/equipment_insert.html', equipments=equipments, count=len(equipments), flag=1)
 
 @app.route('/harvest_aider/maintenance/retieve', methods=['GET', 'POST'])
 def retrieve():
@@ -756,11 +759,10 @@ def retrieve():
             to_date = (datetime.datetime.today() + duration).date()
             retr.next_servicing = to_date
         db.session.commit()  
-        flash('Equipment retrieved successfully!','success')      
-    equipments= Harvest_Equipment.query.filter(Harvest_Equipment.available==0, Harvest_Equipment.state==session['state'], Harvest_Equipment.district==session['district']).all()  
-    return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments)
-
-# def send_mail_for_service():
+        flash('Equipment retrieved successfully!','success')
+    state_district = g.user[0:4]    
+    equipments= Harvest_Equipment.query.filter(Harvest_Equipment.available==0, Harvest_Equipment.equip_id.like('%'+state_district+'%')).all()
+    return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments, count=len(equipments))
 
 @app.route('/factory_manager/')
 def factory_manager():
