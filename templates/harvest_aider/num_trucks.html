@@ -1,19 +1,5 @@
-{% extends "/factory_manager/factory_manager_base.html" %}
+{% extends "/harvest_aider/harvest_aider_base.html" %}
 {% block content%}
-<div class="row clearfix">
-    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box hover-zoom-effect">
-            <div class="icon bg-light-green">
-                <i class="material-icons">shopping_cart</i>
-            </div>
-            <div class="content">
-                <div class="text">BALES COLLECTED</div>
-                <div class="number count-to" data-from="0" data-to="2117" data-speed="1000" data-fresh-interval="20"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="row clearfix">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
@@ -23,39 +9,44 @@
                 </h2>
             </div>
             <div class="body table-responsive">
-                <form action={{ url_for('factory_manager') }} method="POST">
+                <form method="POST" action={{ url_for('update_truck_num') }}>
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>ALLOT DATE OF FULFILMENT</th>
                                 <th>Sr.No.</th>
-                                <th>DATE_REQUEST</th>
+                                <th>REQUEST ID</th>
+                                <th>DATE OF REQUEST</th>
                                 <th>NO OF BALES</th>
-                                <th>DISTRICT</th>
+                                <th>DATE OF FULFILMENT</th>
                                 <th>ESTIMATED_AMOUNT</th>
-                                <th>NO_TRUCKS</th>
+                                <th>NO OF TRUCKS</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% if c_list.count() == 0 %}
+                            {% if count == 0 %}
                             <tr>
                                 <td></td>
+                                <td></td>
+                                <td></td>
                                 <td>NO RECORDS TO DISPLAY</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                             <tr>
                                 {% else: %}
                                 {% set ind=1 %}
-                                {% for entry in c_list %}
+                                {% for entry in data %}
                             <tr>
-                                <td>
-                                    <input type="checkbox" name="completed" id={{ entry.request_id }} value={{ entry.request_id }}>
-                                    <label for={{ entry.request_id }}></label>
-                                </td>
                                 <td>{{ ind }}</td>
+                                <td>{{ entry.request_id }}</td>
                                 <td>{{ entry.date_request }}</td>
                                 <td>{{ entry.bales_stalk }}</td>
-                                <td>{{ entry.district_name }}</td>
+                                <td>{{ entry.date_fulfilment }}</td>
                                 <td>{{ entry.bales_stalk * 20 * 1.75}}</td>
-                                <td>{{ entry.no_trucks }}</td>
+                                <td>
+                                    <input type="hidden" id="request_id", name="request_id" value={{ entry.request_id }} >
+                                    <input type="number" id="no_truck" name="no_truck" class="form-control" placeholder="0">
+                                </td>
                             </tr>
                             {% set ind = ind+1 %}
                             {% endfor %}

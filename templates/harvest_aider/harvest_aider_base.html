@@ -119,10 +119,17 @@
                             <span>Add New Stalk Collector</span>
                         </a>
                     </li>
-                    <li id="request_truck">
-                        <a data-toggle="modal" data-target="#requesting_truck">
+                    <li id="num_stalk">
+                            <a data-toggle="modal" data-target="#number_bales">
+                                <i class="material-icons">local_shipping</i>
+                                <span>Number of Bales</span>
+                            </a>
+                        </li>
+    
+                    <li id="num_truck">
+                        <a href={{ url_for('update_truck_num') }}>
                             <i class="material-icons">local_shipping</i>
-                            <span>Request Stalk Collection</span>
+                            <span>Number of Trucks</span>
                         </a>
                     </li>
                     <li id="report_gen_harvest">
@@ -219,11 +226,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="requesting_truck" tabindex="-1" role="dialog">
+    <div class="modal fade" id="number_bales" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Request Collection of Stalk Bales</h4>
+                    <h4 class="modal-title">Number of Stalk Bales</h4>
                 </div>
                 <div class="modal-body">
                     <form method="POST" action={{ url_for('collection_request') }}>
@@ -231,12 +238,6 @@
                         <div class="form-group">
                             <div class="form-line">
                                 <input type="text" id="stalk_no" name="bales" class="form-control" placeholder="Enter the number of bales">
-                            </div>
-                        </div>
-                        <label for="collection_date">Date of Collection</label>
-                        <div class="form-group">
-                            <div class="form-line">
-                                <input type="date" id="collection_date" name="date" class="form-control">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
@@ -247,6 +248,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 

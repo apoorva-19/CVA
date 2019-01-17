@@ -451,7 +451,7 @@ def allocating_collector():
 def collection_request():
     if g.user and g.user[4] == 'A':
         if request.method == 'POST':
-            date = request.form['date']
+            date = now.strftime('%Y-%m-%d')
             bales = request.form['bales']
             new_req = Factory_Stalk_Collection(date, bales, g.district, g.district, g.state)
             db.session.add(new_req)
@@ -460,6 +460,19 @@ def collection_request():
             return redirect(url_for('harvest_aider'))
     else:
         return render_template('404.html')    
+
+@app.route('/harvest_aider/number_trucks/',methods=['GET','POST'])
+def update_truck_num():
+    if request.method == 'POST':
+        n_truck = request.form.getlist('no_truck')
+        req_id = request.form.getlist('request_id')
+        for n, r in zip(n_truck, req_id):
+            update = Factory_Stalk_Collection.query.filter(Factory_Stalk_Collection.date_fulfilment.isnot(None), Factory_Stalk_Collection.request_id == r).first()
+            update.no_trucks = n
+            print(update.no_trucks)
+        db.session.commit()            
+    entries = Factory_Stalk_Collection.query.filter(Factory_Stalk_Collection.date_fulfilment.isnot(None), Factory_Stalk_Collection.no_trucks == None).all()
+    return render_template('/harvest_aider/num_trucks.html',data=entries, count=len(entries))
 
 def gen_stalk_collector_list(duration):
     header = ['Collector Id', 'Collector Name', 'Contact Number', 'Employed_Date']
@@ -700,7 +713,7 @@ def date_schedule():
             return render_template('/stalk_collector/datewise.html', data=datewise) 
         return render_template('/stalk_collector/datewise.html')
     else:
-        return render_template('404.html')  
+        return render_template('404.html') 
 
 #Update list to complete jobs
 @app.route('/stalk_collector/finjobs/', methods=['GET', 'POST'])
@@ -758,22 +771,29 @@ def retrieve():
             duration = datetime.timedelta(days=90)
             to_date = (datetime.datetime.today() + duration).date()
             retr.next_servicing = to_date
-        db.session.commit()  
+        db.session.commit()
         flash('Equipment retrieved successfully!','success')
     state_district = g.user[0:4]    
     equipments= Harvest_Equipment.query.filter(Harvest_Equipment.available==0, Harvest_Equipment.equip_id.like('%'+state_district+'%')).all()
     return render_template('/harvest_aider/equipment_retrieve.html', equipments = equipments, count=len(equipments))
 
-@app.route('/factory_manager/')
+@app.route('/factory_manager/', methods=['GET','POST'])
 def factory_manager():
     if g.user and g.user[4] == 'M':
-        complete_list = Factory_Stalk_Collection.query.filter_by(date_fulfilment=None)
+        if flask.request.method == 'POST':
+            complete=request.form.getlist('completed')
+            for c in complete:
+                job=Factory_Stalk_Collection.query.filter_by(request_id=c).first()
+                job.date_fulfilment = str(now.strftime('%Y-%m-%d'))
+            db.session.commit()
+        complete_list = Factory_Stalk_Collection.query.filter(Factory_Stalk_Collection.date_fulfilment==None, Factory_Stalk_Collection.state==g.user[0:2], Factory_Stalk_Collection.district_name==g.district)
         return render_template('/factory_manager/index.html', c_list=complete_list)
     else:
         return render_template('404.html')
 
 @app.route('/factory_manager/report_generation/',methods=['GET', 'POST'])
 def report_generation():
+    print(g.user)
     if g.user and g.user[4] == 'M':
         return render_template('/factory_manager/report_generation.html')
     else:
@@ -783,10 +803,9 @@ def report_generation():
 def todays_report():
     if g.user and g.user[4] == 'M':
         todays_list = Factory_Stalk_Collection.query.filter_by(date_fulfilment=now.strftime("%Y/%m/%d"))
-        # print(todays_list[0])
         return render_template('/factory_manager/todays_collection.html', t_list=todays_list)
     else:
         return render_template('404.html')
 
 if __name__ == '__main__':
-    app.run(debug=True,host="0.0.0.0", port=5000)
+    app.run(debug=True,host="0.0.0.0", port=8000)
