@@ -53,62 +53,52 @@
         <div class="card">
             <div class="header">
                 <h2>
-                    JOBS SCHEDULED FOR TODAY
+                    TODAY'S JOBLIST
                 </h2>
             </div>
             <div class="body table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>JOB NO</th>
+                            <th>DATE</th>
+                            <th>TIME</th>
                             <th>COLLECTOR NAME</th>
                             <th>FARMER NAME</th>
-                            <th>AREA</th>
+                            <th>FEES</th>
                             <th>STATUS</th>
                             <th>BALES OF STALK</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% if job_num > 0: %}
+                        {% for job in joblist %}
                         <tr>
-                            <th scope="row">1</th>
-                            <td>Ram</td>
-                            <td>Shivam</td>
-                            <td>8</td>
+                            <th scope="row">{{ job.Job_List.job_no }}</th>
+                            <td>{{ job.Job_List.date_job.strftime("%d-%m-%Y") }}</td>
+                            <td>{{ job.Job_List.time.strftime("%I:%M %p") }}</td>
+                            <td>{{ job.Stalk_Collector.collector_name }}</td>
+                            <td>{{ job.Farmer.farmer_name }}</td>
+                            <td>{{ job.Job_List.fees }}</td>
+                            {% if job.Job_List.job_complete == 0: %}
+                            <td style="color: red">Incomplete</td>
+                            {% else: %}
                             <td>Completed</td>
-                            <td>87</td>
+                            {% endif %}
+                            <td>{{ job.Job_List.bales_collected }}</td>
                         </tr>
+                        {% endfor %}
+                        {% else: %}
                         <tr>
-                            <th scope="row">2</th>
-                            <td>Rajesh</td>
-                            <td>Shiv</td>
-                            <td>5</td>
-                            <td>Completed</td>
-                            <td>50</td>
+                            <th></th>
+                            <td></td>
+                            <td></td>
+                            <td>No records to display</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Amar</td>
-                            <td>Meenabai</td>
-                            <td>2</td>
-                            <td>Completed</td>
-                            <td>30</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">4</th>
-                            <td>Gajendra</td>
-                            <td>Rajashree</td>
-                            <td>4</td>
-                            <td>Incomplete</td>
-                            <td>--</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">5</th>
-                            <td>Amar</td>
-                            <td>Vallabh</td>
-                            <td>6</td>
-                            <td>Incomplete</td>
-                            <td>--</td>
-                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

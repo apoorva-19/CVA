@@ -70,21 +70,65 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if joblist.count() > 0: %}
+                        {% if job_num > 0: %}
                         {% for job in joblist %}
                         <tr>
-                            <th scope="row">{{ job.job_no }}</th>
-                            <td>{{ job.date_job }}</td>
-                            <td>{{ job.time }}</td>
-                            <td>{{ job.collector_id }}</td>
-                            <td>{{ job.farmer_id }}</td>
-                            <td>{{ job.fees }}</td>
-                            {% if job.job_complete == 0: %}
+                            <th scope="row">{{ job.Job_List.job_no }}</th>
+                            <td>{{ job.Job_List.date_job.strftime("%d-%m-%Y") }}</td>
+                            <td>{{ job.Job_List.time.strftime("%I:%M %p") }}</td>
+                            <td>{{ job.Stalk_Collector.collector_name }}</td>
+                            <td>{{ job.Farmer.farmer_name }}</td>
+                            <td>{{ job.Job_List.fees }}</td>
+                            {% if job.Job_List.job_complete == 0: %}
                             <td style="color: red">Incomplete</td>
                             {% else: %}
                             <td>Completed</td>
                             {% endif %}
-                            <td>{{ job.bales_collected }}</td>
+                            <td>{{ job.Job_List.bales_collected }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else: %}
+                        <tr>
+                            <th></th>
+                            <td></td>
+                            <td></td>
+                            <td>No records to display</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    JOBS PENDING
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>JOB NO</th>
+                            <th>FARMER NAME</th>
+                            <th>FARM SIZE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pending_num > 0: %}
+                        {% for job in pending_list %}
+                        <tr>
+                            <th scope="row">{{ job.Job_List.job_no }}</th>
+                            <td>{{ job.Farmer.farmer_name }}</td>
+                            <td>{{ job.Farmer.farm_size}}</td>
                         </tr>
                         {% endfor %}
                         {% else: %}

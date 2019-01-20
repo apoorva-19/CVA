@@ -13,39 +13,39 @@
 <div class="row clearfix">
     {% if data != 0: %}
     {% for j in data: %}
-    {%if j.job_complete == 0%}
+    {%if j.Job_List.job_complete == 0%}
     <div class="">
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
             <div class="card">
                 <div class="header">
                     <h2>
-                        JOB NUMBER: {{ j.job_no }}
+                        JOB NUMBER: {{ j.Job_List.job_no }}
                     </h2>
                 </div>
                 <div class="body">
                     <table class="table">
                         <tr>
                             <th>Farmer Id</th>
-                            <td>{{ j.farmer_id }}</td>
+                            <td>{{ j.Farmer.farmer_name }}</td>
                         </tr>
                         <tr>
                             <th>Farm Size</th>
-                            <td>{{ j.farm_size }}</td>
+                            <td>{{ j.Job_List.farm_size }}</td>
                         </tr>
                         <tr>
                             <th>Date of job</th>
-                            <td>{{ j.date_job }}</td>
+                            <td>{{ j.Job_List.date_job }}</td>
                         </tr>
                         <tr>
                             <th>Time</th>
-                            <td>{{ j.time }} </td>
+                            <td>{{ j.Job_List.time }} </td>
                         </tr>
                         <tr>
                             <th>Time Required</th>
-                            <td>{{'%0.1f' % j.expected_duration }} hrs</td>
+                            <td>{{'%0.1f' % j.Job_List.expected_duration }} hrs</td>
                         </tr>
                         <tr>
-                            {% if j.bales_collected == 0%}
+                            {% if j.Job_List.bales_collected == 0%}
                             <th>Bales to collect</th>
                             <td>
                                 <form method="POST" action={{ url_for('joblist') }} class="form-horizontal">
@@ -56,26 +56,30 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" id={{ j.job_no }} value={{ j.job_no }} name="j_no">
+                                    <input type="hidden" id="j_no" value={{ j.Job_List.job_no }} name="j_no">
                                     <button type="submit" class="btn btn-primary waves-effect">Calculate amount to pay</button>
                                 </form>
                             </td>
                             {%endif%}
                         </tr>
-                        {%if j.bales_collected != 0%}
+                        {%if j.Job_List.bales_collected != 0%}
                         <tr>
                             <th>Bales collected</th>
-                            <td>{{ j.bales_collected }}</td>
+                            <td>{{ j.Job_List.bales_collected }}</td>
                         </tr>
                         <tr>
                             <th>Amount to pay</th>
-                            <td>{{ j.fees }}</td>
+                            <td>{{ j.Job_List.fees }}</td>
                         </tr>
-                        <form method="POST" action={{ url_for('job_comp') }} class="form-horizontal">
-                            <input type="hidden" , value={{ j.job_no }} name="j">
-                            <br>
-                            <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
-                        </form>
+                        <tr>
+                            <td>
+                                <form method="POST" action={{ url_for('job_comp') }} class="form-horizontal">
+                                    <input type="hidden" , value={{ j.Job_List.job_no }} name="j">
+                                    <br>
+                                    <button type="submit" class="btn btn-success waves-effect">Job Complete!</button>
+                                </form>
+                            </td>
+                        </tr>
                         {%endif%}
                     </table>
                 </div>

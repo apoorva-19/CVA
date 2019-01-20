@@ -16,6 +16,9 @@
     <!-- Bootstrap Core Css -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/bootstrap/css/bootstrap.css') }}">
 
+    <!-- Bootstrap Select Css -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/bootstrap-select/css/bootstrap-select.css') }}"/>
+
     <!-- Waves Effect Css -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='plugins/node-waves/waves.css') }}">
 
@@ -120,12 +123,12 @@
                         </a>
                     </li>
                     <li id="num_stalk">
-                            <a data-toggle="modal" data-target="#number_bales">
-                                <i class="material-icons">local_shipping</i>
-                                <span>Number of Bales</span>
-                            </a>
-                        </li>
-    
+                        <a href={{ url_for('update_bales_num') }}>
+                            <i class="material-icons">local_shipping</i>
+                            <span>Number of Bales</span>
+                        </a>
+                    </li>
+
                     <li id="num_truck">
                         <a href={{ url_for('update_truck_num') }}>
                             <i class="material-icons">local_shipping</i>
@@ -225,30 +228,6 @@
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="number_bales" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Number of Stalk Bales</h4>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action={{ url_for('collection_request') }}>
-                        <label for="stalk_no">Bales of Stalk</label>
-                        <div class="form-group">
-                            <div class="form-line">
-                                <input type="text" id="stalk_no" name="bales" class="form-control" placeholder="Enter the number of bales">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary waves-effect" style="float:right;">SUBMIT</button>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Jquery Core Js -->
     <script src="{{ url_for('static',filename='plugins/jquery/jquery.min.js') }}"></script>
 

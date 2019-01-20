@@ -33,7 +33,6 @@
                                 <th>NO OF BALES</th>
                                 <th>DISTRICT</th>
                                 <th>ESTIMATED_AMOUNT</th>
-                                <th>NO_TRUCKS</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,7 +54,6 @@
                                 <td>{{ entry.bales_stalk }}</td>
                                 <td>{{ entry.district_name }}</td>
                                 <td>{{ entry.bales_stalk * 20 * 1.75}}</td>
-                                <td>{{ entry.no_trucks }}</td>
                             </tr>
                             {% set ind = ind+1 %}
                             {% endfor %}

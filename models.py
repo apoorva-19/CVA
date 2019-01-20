@@ -65,7 +65,7 @@ class Patwari(db.Model):
         self.state = state
         self.contact_no = contact_no
         self.email_id = email_id
-        
+                
 class Farmer(db.Model):
 
     __tablename__ = 'farmer'
@@ -234,12 +234,47 @@ class Request_user_id(db.Model):
         self.req_gen_id = req_gen_id
         self.no_gen = no_gen
 
+class Factory_Manager(db.Model):
+
+    __tablename__='factory_manager'
+
+    username = db.Column(db.String(20), primary_key=True)
+    password_hash = db.Column(db.String(128))
+    name = db.Column(db.String(30))
+    contact_no = db.Column(db.String(10), unique=True, index=True)
+    email_id = db.Column(db.String(64), unique=True, index=True)
+    district_name = db.Column(db.String(25))
+    state = db.Column(db.String(2))
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.username}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return Factory_Manager.query.get(user_id)
+
+    def __init__(self, username, password, name, contact_no, email_id, district_name, state):
+        self.username = username
+        self.password_hash = generate_password_hash(password)
+        self.name = name
+        self.contact_no = contact_no
+        self.email_id = email_id
+        self.district_name = district_name
+        self.state = state
+
 class Factory_Stalk_Collection(db.Model):
 
     __tablename__ = 'factory_stalk_collection'
     __table_args__ = {'extend_existing':True} 
 
     request_id = db.Column(db.Integer, primary_key=True)
+    factory_manager_id = db.Column(db.String(20), db.ForeignKey('factory_manager.username'))
     village_name = db.Column(db.String(20))
     district_name = db.Column(db.String(25))
     state = db.Column(db.String(2))
@@ -248,13 +283,15 @@ class Factory_Stalk_Collection(db.Model):
     bales_stalk = db.Column(db.Integer)
     no_trucks = db.Column(db.Integer)
     amt_received = db.Column(db.Integer)
+    factory_manager = db.relationship(Factory_Manager, backref='factory_manager', uselist=False, foreign_keys=factory_manager_id)
 
-    def __init__(self, date_request, bales_stalk, village_name, district_name, state):
+    def __init__(self, date_request, bales_stalk, village_name, district_name, state, factory_manager_id):
         self.date_request = date_request
         self.bales_stalk = bales_stalk
         self.village_name = village_name
         self.district_name = district_name
         self.state = state
+        self.factory_manager_id = factory_manager_id
         
 class Harvest_Aider(db.Model):
 
@@ -341,40 +378,6 @@ class User_Id(db.Model):
 
     def __init__(self, state_district):
         self.state_district = state_district
-
-class Factory_Manager(db.Model):
-
-    __tablename__='factory_manager'
-
-    username = db.Column(db.String(20), primary_key=True)
-    password_hash = db.Column(db.String(128))
-    name = db.Column(db.String(30))
-    contact_no = db.Column(db.String(10), unique=True, index=True)
-    email_id = db.Column(db.String(64), unique=True, index=True)
-    district_name = db.Column(db.String(25))
-    state = db.Column(db.String(2))
-
-    def get_reset_token(self, expires_sec=1800):
-        s = Serializer(app.config['SECRET_KEY'], expires_sec)
-        return s.dumps({'user_id': self.username}).decode('utf-8')
-
-    @staticmethod
-    def verify_reset_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
-        try:
-            user_id = s.loads(token)['user_id']
-        except:
-            return None
-        return Factory_Manager.query.get(user_id)
-
-    def __init__(self, username, password, name, contact_no, email_id, district_name, state):
-        self.username = username
-        self.password_hash = generate_password_hash(password)
-        self.name = name
-        self.contact_no = contact_no
-        self.email_id = email_id
-        self.district_name = district_name
-        self.state = state
 
 class Bales_Collected(db.Model):
 
